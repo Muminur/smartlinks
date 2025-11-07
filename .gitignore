@@ -1,0 +1,236 @@
+# TinyURL Clone Project - .gitignore
+
+# ===================================
+# Dependencies
+# ===================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# ===================================
+# Environment Variables
+# ===================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# ===================================
+# Next.js (Frontend)
+# ===================================
+frontend/.next/
+frontend/out/
+frontend/.swc/
+frontend/build/
+frontend/dist/
+.vercel
+.turbo
+
+# Next.js cache
+frontend/.next/cache/
+
+# ===================================
+# Build Outputs
+# ===================================
+build/
+dist/
+out/
+*.log
+.DS_Store
+Thumbs.db
+
+# ===================================
+# TypeScript
+# ===================================
+*.tsbuildinfo
+backend/dist/
+frontend/dist/
+backend/build/
+frontend/build/
+
+# ===================================
+# Testing
+# ===================================
+coverage/
+.nyc_output/
+*.lcov
+*.log
+test-results/
+playwright-report/
+junit.xml
+
+# ===================================
+# IDEs and Editors
+# ===================================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-*
+.history/
+
+# ===================================
+# OS Files
+# ===================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===================================
+# Logs
+# ===================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+combined.log
+error.log
+access.log
+
+# ===================================
+# Docker
+# ===================================
+docker-compose.override.yml
+.docker/
+
+# Persistent data (optional - keep if you want git to ignore DB data)
+data/
+volumes/
+mongo-data/
+redis-data/
+
+# ===================================
+# MongoDB
+# ===================================
+*.db
+dump/
+*.bson
+*.mmapv1
+
+# ===================================
+# Redis
+# ===================================
+dump.rdb
+appendonly.aof
+
+# ===================================
+# SSL Certificates
+# ===================================
+ssl/
+*.pem
+*.key
+*.crt
+*.csr
+*.cert
+*.p12
+*.pfx
+
+# ===================================
+# Uploads & User Generated Content
+# ===================================
+uploads/
+temp/
+tmp/
+backend/uploads/
+frontend/public/uploads/
+
+# ===================================
+# Backup Files
+# ===================================
+*.backup
+*.bak
+*.old
+backup/
+backups/
+
+# ===================================
+# Package Manager Locks (optional)
+# ===================================
+# Uncomment if you want to ignore lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ===================================
+# Production Secrets
+# ===================================
+secrets/
+.secrets/
+credentials.json
+service-account.json
+
+# ===================================
+# CI/CD
+# ===================================
+.gitlab-ci-local/
+.circleci/config.local.yml
+
+# ===================================
+# Miscellaneous
+# ===================================
+.cache/
+.temp/
+.tmp/
+*.pid
+*.seed
+*.pid.lock
+.vscode-test
+*.code-workspace
+
+# ===================================
+# Documentation Build
+# ===================================
+docs/build/
+site/
+
+# ===================================
+# Sentry
+# ===================================
+.sentryclirc
+
+# ===================================
+# Analytics & Monitoring
+# ===================================
+.lighthouseci/
+
+# ===================================
+# PM2
+# ===================================
+.pm2/
+ecosystem.config.js.local
+
+# ===================================
+# Local Development
+# ===================================
+.local/
+local/
+sandbox/
+
+# ===================================
+# Keep These Files
+# ===================================
+!.gitkeep
+!.env.example
+!.vscode/extensions.json
+!docker-compose.yml
+!docker-compose.prod.yml
