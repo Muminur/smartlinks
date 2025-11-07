@@ -227,6 +227,15 @@ local/
 sandbox/
 
 # ===================================
+# Documentation Files
+# ===================================
+# Ignore all markdown files except README.md
+*.md
+!README.md
+!readme.md
+!Readme.md
+
+# ===================================
 # Keep These Files
 # ===================================
 !.gitkeep
