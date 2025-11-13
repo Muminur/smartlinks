@@ -27,7 +27,7 @@ export class CacheService {
    * @param slug - Link slug to retrieve
    * @returns Cached link data or null if not found
    */
-  static async getCachedLink(slug: string): Promise<any | null> {
+  static async getCachedLink(slug: string): Promise<Record<string, unknown> | null> {
     try {
       const redis = getRedisClient();
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
@@ -55,7 +55,7 @@ export class CacheService {
    * @param link - Link document to cache
    * @param ttl - Optional custom TTL in seconds (default: 1 hour)
    */
-  static async setCachedLink(slug: string, link: any, ttl?: number): Promise<void> {
+  static async setCachedLink(slug: string, link: Record<string, unknown>, ttl?: number): Promise<void> {
     try {
       const redis = getRedisClient();
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
@@ -183,7 +183,7 @@ export class CacheService {
    * @param data - Data to cache
    * @param ttl - TTL in seconds (default: 5 minutes)
    */
-  static async cacheAnalytics(key: string, data: any, ttl?: number): Promise<void> {
+  static async cacheAnalytics(key: string, data: Record<string, unknown>, ttl?: number): Promise<void> {
     try {
       const redis = getRedisClient();
       const cacheKey = `${CACHE_PREFIX.ANALYTICS}${key}`;
@@ -201,7 +201,7 @@ export class CacheService {
    * @param key - Cache key
    * @returns Cached data or null
    */
-  static async getCachedAnalytics(key: string): Promise<any | null> {
+  static async getCachedAnalytics(key: string): Promise<Record<string, unknown> | null> {
     try {
       const redis = getRedisClient();
       const cacheKey = `${CACHE_PREFIX.ANALYTICS}${key}`;

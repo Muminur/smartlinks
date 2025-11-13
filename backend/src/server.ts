@@ -24,6 +24,15 @@ const startServer = async (): Promise<void> => {
     // Connect to Redis
     await connectRedis();
 
+    // Start analytics cron jobs in production
+    if (config.NODE_ENV === 'production') {
+      const { startAnalyticsJobs } = await import('./jobs/analyticsAggregation.job');
+      startAnalyticsJobs();
+      logger.info('Analytics cron jobs started');
+    } else {
+      logger.info('Analytics cron jobs disabled in development mode');
+    }
+
     // Start Express server
     const server = app.listen(config.PORT, () => {
       logger.info(`Server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
