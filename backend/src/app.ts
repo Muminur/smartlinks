@@ -9,6 +9,7 @@ import { morganStream } from './utils/logger';
 import { errorHandler, notFound } from './middleware/errorMiddleware';
 import { apiLimiter } from './middleware/rateLimiter';
 import routes from './routes';
+import redirectRoutes from './routes/redirect.routes';
 
 const app: Application = express();
 
@@ -45,13 +46,13 @@ if (config.NODE_ENV === 'development') {
 // Trust proxy (required for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
 
-// Apply rate limiting to all routes
+// Apply rate limiting to API routes only
 app.use('/api/', apiLimiter);
 
-// API routes
+// API routes (mounted under /api prefix)
 app.use('/api', routes);
 
-// Root endpoint
+// Root endpoint (server info)
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
@@ -60,6 +61,11 @@ app.get('/', (_req: Request, res: Response) => {
     documentation: '/api/docs',
   });
 });
+
+// Redirect routes (mounted at root level for /:slug pattern)
+// IMPORTANT: This must come AFTER the root endpoint but BEFORE 404 handler
+// Routes: /:slug, /api/links/preview/:slug, /api/redirect/stats
+app.use('/', redirectRoutes);
 
 // Handle 404 errors
 app.use(notFound);

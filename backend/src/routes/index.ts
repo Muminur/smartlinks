@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import healthRoutes from './healthRoutes';
 import authRoutes from './auth.routes';
+import linkRoutes from './link.routes';
 
 const router = Router();
 
@@ -10,8 +11,10 @@ router.use('/', healthRoutes);
 // Authentication routes
 router.use('/auth', authRoutes);
 
+// Link management routes
+router.use('/links', linkRoutes);
+
 // Future routes will be added here
-// router.use('/links', linkRoutes);
 // router.use('/analytics', analyticsRoutes);
 // router.use('/users', userRoutes);
 // router.use('/domains', domainRoutes);
