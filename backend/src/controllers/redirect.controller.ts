@@ -157,7 +157,7 @@ export const redirectController = async (req: Request, res: Response): Promise<v
       // Step 6: Track click asynchronously (non-blocking)
       // Use setImmediate to defer execution without blocking redirect
       setImmediate(() => {
-        trackClick(req, link._id.toString(), link.userId.toString(), slug);
+        trackClick(req, (link as any)._id?.toString(), (link as any).userId?.toString(), slug);
         trackUniqueVisitor(slug, req.ip || 'unknown');
       });
     } else {
@@ -176,7 +176,7 @@ export const redirectController = async (req: Request, res: Response): Promise<v
     res.setHeader('X-Redirect-Latency', `${latency}ms`);
 
     // Perform the redirect
-    res.redirect(redirectType, link.originalUrl);
+    res.redirect(redirectType, (link as any).originalUrl as string);
   } catch (error: any) {
     const latency = Date.now() - startTime;
     logger.error(`Error in redirectController for slug ${slug} (${latency}ms):`, error);
@@ -346,7 +346,7 @@ export const serveBotPage = async (req: Request, res: Response): Promise<void> =
   const { slug } = req.params;
 
   try {
-    const link = await CacheService.getCachedLink(slug);
+    let link: any = await CacheService.getCachedLink(slug);
 
     if (!link) {
       const linkDoc = await Link.findOne({ slug }).lean();
@@ -354,6 +354,7 @@ export const serveBotPage = async (req: Request, res: Response): Promise<void> =
         res.status(404).send('Link not found');
         return;
       }
+      link = linkDoc;
     }
 
     // Generate HTML with Open Graph meta tags

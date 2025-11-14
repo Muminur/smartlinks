@@ -46,6 +46,7 @@ services:
     build:
       context: ./backend
       dockerfile: ../docker/backend.Dockerfile
+      target: dev
       args:
         NODE_ENV: ${NODE_ENV:-development}
     container_name: tinyurl-backend
@@ -93,6 +94,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ../docker/frontend.Dockerfile
+      target: dev
       args:
         NODE_ENV: ${NODE_ENV:-development}
     container_name: tinyurl-frontend

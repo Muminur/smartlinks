@@ -63,8 +63,8 @@ RUN adduser --system --uid 1001 expressjs
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy built files if they exist, otherwise copy source
-COPY --from=builder /app/dist ./dist 2>/dev/null || COPY --from=builder /app/src ./src
+# Copy built files (dist folder created by TypeScript compilation)
+COPY --from=builder /app/dist ./dist
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown -R expressjs:nodejs /app
