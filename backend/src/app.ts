@@ -19,7 +19,7 @@ app.use(helmet());
 // CORS configuration
 app.use(
   cors({
-    origin: config.FRONTEND_URL,
+    origin: config.CORS_ORIGIN?.split(',') || config.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],

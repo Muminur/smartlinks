@@ -263,8 +263,9 @@ class LinkService {
 
       const slug = await this.generateSlug(linkData.customSlug, user.plan.type);
       const metadata = await this.extractMetadata(linkData.originalUrl);
-      const domain = linkData.domain || 'short.link';
-      const shortUrl = `https://${domain}/${slug}`;
+      const domain = linkData.domain || process.env.SHORT_DOMAIN || process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'localhost:5000';
+      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+      const shortUrl = `${protocol}://${domain}/${slug}`;
 
       const link = new Link({
         slug,

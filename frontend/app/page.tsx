@@ -68,13 +68,12 @@ export default function Home() {
         customSlug: customSlug || undefined,
       });
 
-      const data = response.data.data;
-      const shortUrl = `${window.location.origin}/${data.slug}`;
+      const data = response.data.data.link;
 
       setShortenedLink({
         slug: data.slug,
         originalUrl: data.originalUrl,
-        shortUrl,
+        shortUrl: data.shortUrl,
         qrCode: data.qrCode,
         metadata: data.metadata,
       });

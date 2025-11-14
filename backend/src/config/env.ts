@@ -14,6 +14,7 @@ interface EnvConfig {
   JWT_REFRESH_SECRET: string;
   JWT_REFRESH_EXPIRE: string;
   FRONTEND_URL: string;
+  CORS_ORIGIN?: string;
   EMAIL_HOST: string;
   EMAIL_PORT: number;
   EMAIL_USER: string;
@@ -39,6 +40,7 @@ export const config: EnvConfig = {
   JWT_REFRESH_SECRET: getEnvVariable('JWT_REFRESH_SECRET', 'your-super-secret-refresh-key-change-in-production-min-32-chars'),
   JWT_REFRESH_EXPIRE: getEnvVariable('JWT_REFRESH_EXPIRE', '30d'),
   FRONTEND_URL: getEnvVariable('FRONTEND_URL', 'http://localhost:3000'),
+  CORS_ORIGIN: process.env.CORS_ORIGIN,
   EMAIL_HOST: getEnvVariable('EMAIL_HOST', 'smtp.gmail.com'),
   EMAIL_PORT: parseInt(getEnvVariable('EMAIL_PORT', '587'), 10),
   EMAIL_USER: getEnvVariable('EMAIL_USER', ''),
