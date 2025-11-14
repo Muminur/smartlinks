@@ -15,6 +15,10 @@ interface EnvConfig {
   JWT_REFRESH_EXPIRE: string;
   FRONTEND_URL: string;
   CORS_ORIGIN?: string;
+  // Link shortening domain configuration
+  SHORT_DOMAIN?: string;
+  DEFAULT_DOMAIN?: string;
+  ALLOWED_DOMAINS?: string;
   ENABLE_EMAIL: boolean;
   EMAIL_HOST: string;
   EMAIL_PORT: number;
@@ -42,6 +46,10 @@ export const config: EnvConfig = {
   JWT_REFRESH_EXPIRE: getEnvVariable('JWT_REFRESH_EXPIRE', '30d'),
   FRONTEND_URL: getEnvVariable('FRONTEND_URL', 'http://localhost:3000'),
   CORS_ORIGIN: process.env.CORS_ORIGIN,
+  // Link shortening domain configuration
+  SHORT_DOMAIN: process.env.SHORT_DOMAIN,
+  DEFAULT_DOMAIN: process.env.DEFAULT_DOMAIN,
+  ALLOWED_DOMAINS: process.env.ALLOWED_DOMAINS,
   ENABLE_EMAIL: getEnvVariable('ENABLE_EMAIL', 'false').toLowerCase() === 'true',
   EMAIL_HOST: getEnvVariable('EMAIL_HOST', 'smtp.gmail.com'),
   EMAIL_PORT: parseInt(getEnvVariable('EMAIL_PORT', '587'), 10),

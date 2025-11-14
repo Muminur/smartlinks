@@ -64,6 +64,10 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # Link shortening domain configuration
+      SHORT_DOMAIN: ${SHORT_DOMAIN:-localhost:5000}
+      DEFAULT_DOMAIN: ${DEFAULT_DOMAIN:-localhost:3000}
+      ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-localhost:3000,localhost:5000}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
       EMAIL_USER: ${EMAIL_USER}
