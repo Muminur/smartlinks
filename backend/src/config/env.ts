@@ -34,11 +34,11 @@ const getEnvVariable = (key: string, defaultValue?: string): string => {
 export const config: EnvConfig = {
   NODE_ENV: getEnvVariable('NODE_ENV', 'development'),
   PORT: parseInt(getEnvVariable('PORT', '5000'), 10),
-  MONGODB_URI: getEnvVariable('MONGODB_URI', 'mongodb://admin:admin123@localhost:27017/tinyurl?authSource=admin'),
-  REDIS_URL: getEnvVariable('REDIS_URL', 'redis://localhost:6379'),
-  JWT_SECRET: getEnvVariable('JWT_SECRET', 'your-super-secret-jwt-key-change-in-production-min-32-chars'),
+  MONGODB_URI: getEnvVariable('MONGODB_URI'), // Required - no default
+  REDIS_URL: getEnvVariable('REDIS_URL'), // Required - no default
+  JWT_SECRET: getEnvVariable('JWT_SECRET'), // Required - no default
   JWT_EXPIRE: getEnvVariable('JWT_EXPIRE', '7d'),
-  JWT_REFRESH_SECRET: getEnvVariable('JWT_REFRESH_SECRET', 'your-super-secret-refresh-key-change-in-production-min-32-chars'),
+  JWT_REFRESH_SECRET: getEnvVariable('JWT_REFRESH_SECRET'), // Required - no default
   JWT_REFRESH_EXPIRE: getEnvVariable('JWT_REFRESH_EXPIRE', '30d'),
   FRONTEND_URL: getEnvVariable('FRONTEND_URL', 'http://localhost:3000'),
   CORS_ORIGIN: process.env.CORS_ORIGIN,

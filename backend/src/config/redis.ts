@@ -34,7 +34,14 @@ export const connectRedis = async (): Promise<RedisClientType | null> => {
   }
 
   try {
-    const redisURL = process.env.REDIS_URL || 'redis://localhost:6379';
+    const redisURL = process.env.REDIS_URL;
+
+    if (!redisURL) {
+      logger.warn('REDIS_URL environment variable is not set.');
+      logger.warn('Redis caching will be disabled. Set REDIS_URL in your .env file to enable caching.');
+      redisEnabled = false;
+      return null;
+    }
 
     logger.info(`Attempting to connect to Redis at ${redisURL}...`);
 

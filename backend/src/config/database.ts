@@ -3,7 +3,11 @@ import { logger } from '../utils/logger';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/tinyurl';
+    const mongoURI = process.env.MONGODB_URI;
+
+    if (!mongoURI) {
+      throw new Error('MONGODB_URI environment variable is required. Please set it in your .env file.');
+    }
 
     // Configure connection options for remote MongoDB server
     const connectionOptions = {
