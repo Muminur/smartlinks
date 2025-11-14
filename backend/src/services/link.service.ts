@@ -227,16 +227,24 @@ class LinkService {
     }
   }
 
-  async shortenUrl(userId: string, linkData: CreateLinkData): Promise<ILinkDocument> {
+  async shortenUrl(userId: string | null, linkData: CreateLinkData): Promise<ILinkDocument> {
     try {
-      const user = await User.findById(userId);
-      if (!user) {
-        throw new NotFoundError('User not found');
-      }
+      // Handle anonymous users (userId is null for public endpoint)
+      let user = null;
+      let userPlanType = 'free';
 
-      const quotaCheck = await this.checkQuota(userId);
-      if (!quotaCheck.allowed) {
-        throw new ForbiddenError(quotaCheck.reason || 'Quota exceeded');
+      if (userId) {
+        user = await User.findById(userId);
+        if (!user) {
+          throw new NotFoundError('User not found');
+        }
+
+        const quotaCheck = await this.checkQuota(userId);
+        if (!quotaCheck.allowed) {
+          throw new ForbiddenError(quotaCheck.reason || 'Quota exceeded');
+        }
+
+        userPlanType = user.plan.type;
       }
 
       try {
@@ -245,13 +253,16 @@ class LinkService {
         throw new ValidationError('Invalid URL format. Please provide a valid HTTP or HTTPS URL.');
       }
 
-      const duplicate = await this.checkDuplicateUrl(userId, linkData.originalUrl);
-      if (duplicate) {
-        logger.info(`Returning existing link for URL: ${linkData.originalUrl}`);
-        return duplicate;
+      // Check for duplicates only for authenticated users
+      if (userId) {
+        const duplicate = await this.checkDuplicateUrl(userId, linkData.originalUrl);
+        if (duplicate) {
+          logger.info(`Returning existing link for URL: ${linkData.originalUrl}`);
+          return duplicate;
+        }
       }
 
-      const limits = this.getPlanLimits(user.plan.type);
+      const limits = this.getPlanLimits(userPlanType);
 
       if (linkData.password && !limits.passwordProtection) {
         throw new ForbiddenError('Password protection is not available on your plan. Please upgrade to Pro or higher.');
@@ -261,7 +272,7 @@ class LinkService {
         throw new ForbiddenError('Custom domains are not available on your plan. Please upgrade to Business or higher.');
       }
 
-      const slug = await this.generateSlug(linkData.customSlug, user.plan.type);
+      const slug = await this.generateSlug(linkData.customSlug, userPlanType);
       const metadata = await this.extractMetadata(linkData.originalUrl);
       const domain = linkData.domain || process.env.SHORT_DOMAIN || process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'localhost:5000';
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
@@ -271,7 +282,7 @@ class LinkService {
         slug,
         originalUrl: linkData.originalUrl,
         shortUrl,
-        userId: new Types.ObjectId(userId),
+        userId: userId ? new Types.ObjectId(userId) : undefined,
         domain,
         title: linkData.title,
         description: linkData.description,
@@ -287,8 +298,11 @@ class LinkService {
 
       await link.save();
 
-      user.quota.linksCreated += 1;
-      await user.save();
+      // Update user quota only for authenticated users
+      if (user) {
+        user.quota.linksCreated += 1;
+        await user.save();
+      }
 
       const redis = getRedisClient();
       if (redis.isReady) {

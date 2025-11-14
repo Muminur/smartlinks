@@ -63,7 +63,7 @@ export default function Home() {
     setShortenedLink(null);
 
     try {
-      const response = await api.post(API_ENDPOINTS.LINKS.CREATE, {
+      const response = await api.post(API_ENDPOINTS.LINKS.PUBLIC_CREATE, {
         originalUrl: url,
         customSlug: customSlug || undefined,
       });

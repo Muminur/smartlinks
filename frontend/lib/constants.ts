@@ -25,7 +25,8 @@ export const API_ENDPOINTS = {
   },
   // Link endpoints
   LINKS: {
-    CREATE: '/links',
+    CREATE: '/links/shorten',
+    PUBLIC_CREATE: '/links/public/shorten',
     LIST: '/links',
     GET: (id: string) => `/links/${id}`,
     UPDATE: (id: string) => `/links/${id}`,

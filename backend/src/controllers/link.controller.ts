@@ -6,6 +6,46 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import { ValidationError } from '../utils/errorHandler';
 
 /**
+ * Shorten a URL - Public endpoint for anonymous users
+ * POST /api/links/public/shorten
+ */
+export const shortenUrlPublicController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const linkData: CreateLinkData = {
+      originalUrl: req.body.originalUrl,
+      customSlug: req.body.customSlug,
+      // Public links have limited features
+      title: undefined,
+      description: undefined,
+      tags: [],
+      expiresAt: undefined,
+      maxClicks: undefined,
+      password: undefined,
+      domain: undefined,
+      utm: undefined,
+    };
+
+    // Create shortened link without authentication (userId is null)
+    const link = await linkService.shortenUrl(null, linkData);
+
+    const response: ApiResponse = {
+      success: true,
+      data: { link },
+      message: 'Link shortened successfully! Sign up for advanced features.',
+    };
+
+    res.status(201).json(response);
+  } catch (error) {
+    logger.error('Shorten URL public controller error:', error);
+    next(error);
+  }
+};
+
+/**
  * Shorten a URL (Create a shortened link)
  * POST /api/links/shorten
  */

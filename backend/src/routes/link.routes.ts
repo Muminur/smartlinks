@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   shortenUrlController,
+  shortenUrlPublicController,
   getLinksController,
   getLinkByIdController,
   updateLinkController,
@@ -24,7 +25,24 @@ import { createLinkLimiter } from '../middleware/rateLimiter';
 const router = Router();
 
 /**
- * All routes require authentication
+ * Public routes (no authentication required)
+ */
+
+/**
+ * @route   POST /api/links/public/shorten
+ * @desc    Shorten a URL (public endpoint for landing page)
+ * @access  Public
+ * @body    originalUrl, customSlug
+ */
+router.post(
+  '/public/shorten',
+  createLinkLimiter,
+  validateRequest(shortenUrlSchema),
+  shortenUrlPublicController
+);
+
+/**
+ * Authenticated routes (require login)
  */
 
 /**

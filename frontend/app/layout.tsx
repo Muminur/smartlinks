@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -65,11 +66,42 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const savedTheme = localStorage.getItem('ui-storage');
+                if (savedTheme) {
+                  const { state } = JSON.parse(savedTheme);
+                  const theme = state.theme || 'system';
+                  const root = document.documentElement;
+                  root.classList.remove('light', 'dark');
+
+                  if (theme === 'system') {
+                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    root.classList.add(systemTheme);
+                  } else {
+                    root.classList.add(theme);
+                  }
+                } else {
+                  // Default to system theme if no saved preference
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  root.classList.add(systemTheme);
+                }
+              } catch (e) {
+                // Fallback to light theme on error
+                document.documentElement.classList.add('light');
+              }
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
