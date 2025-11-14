@@ -184,7 +184,7 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
 );
 
 // Indexes
-UserSchema.index({ email: 1 }, { unique: true });
+// email index is already created by unique: true constraint on line 59
 UserSchema.index({ 'plan.type': 1 });
 UserSchema.index({ emailVerificationToken: 1 });
 UserSchema.index({ resetPasswordToken: 1 });

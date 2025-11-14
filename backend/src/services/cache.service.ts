@@ -30,6 +30,18 @@ export class CacheService {
   static async getCachedLink(slug: string): Promise<Record<string, unknown> | null> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, return null immediately
+      if (!redis) {
+        return null;
+      }
+
+      // Check if Redis is ready and open before attempting to use it
+      if (!redis.isReady || !redis.isOpen) {
+        logger.debug(`Redis not available (ready: ${redis.isReady}, open: ${redis.isOpen}), skipping cache for slug: ${slug}`);
+        return null;
+      }
+
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
 
       const startTime = Date.now();
@@ -58,6 +70,18 @@ export class CacheService {
   static async setCachedLink(slug: string, link: Record<string, unknown>, ttl?: number): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip caching silently
+      if (!redis) {
+        return;
+      }
+
+      // Check if Redis is ready and open before attempting to use it
+      if (!redis.isReady || !redis.isOpen) {
+        logger.debug(`Redis not available (ready: ${redis.isReady}, open: ${redis.isOpen}), skipping cache set for slug: ${slug}`);
+        return;
+      }
+
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
 
       // Serialize link data (exclude sensitive fields)
@@ -99,6 +123,12 @@ export class CacheService {
   static async invalidateLinkCache(slug: string): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip invalidation silently
+      if (!redis) {
+        return;
+      }
+
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
 
       await redis.del(cacheKey);
@@ -118,6 +148,12 @@ export class CacheService {
   static async invalidateUserLinksCache(userId: string): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip invalidation silently
+      if (!redis) {
+        return;
+      }
+
       const cacheKey = `${CACHE_PREFIX.USER_LINKS}${userId}`;
 
       await redis.del(cacheKey);
@@ -135,6 +171,11 @@ export class CacheService {
   static async trackHotLink(slug: string): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip tracking silently
+      if (!redis) {
+        return;
+      }
 
       // Increment score in sorted set (score = access count)
       await redis.zIncrBy(CACHE_PREFIX.HOT_LINKS, 1, slug);
@@ -158,6 +199,11 @@ export class CacheService {
   static async getHotLinks(limit: number = 100): Promise<Array<{ slug: string; score: number }>> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, return empty array
+      if (!redis) {
+        return [];
+      }
 
       // Get top N links with highest scores
       const results = await redis.zRangeWithScores(
@@ -186,6 +232,12 @@ export class CacheService {
   static async cacheAnalytics(key: string, data: Record<string, unknown>, ttl?: number): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip caching silently
+      if (!redis) {
+        return;
+      }
+
       const cacheKey = `${CACHE_PREFIX.ANALYTICS}${key}`;
       const cacheTTL = ttl || CACHE_TTL.ANALYTICS;
 
@@ -204,6 +256,12 @@ export class CacheService {
   static async getCachedAnalytics(key: string): Promise<Record<string, unknown> | null> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, return null
+      if (!redis) {
+        return null;
+      }
+
       const cacheKey = `${CACHE_PREFIX.ANALYTICS}${key}`;
 
       const cached = await redis.get(cacheKey);
@@ -224,6 +282,12 @@ export class CacheService {
   static async clearAllCache(): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip silently
+      if (!redis) {
+        logger.debug('Redis not available, skipping cache clear');
+        return;
+      }
 
       // Get all keys matching our prefixes
       const linkKeys = await redis.keys(`${CACHE_PREFIX.LINK}*`);
@@ -254,6 +318,16 @@ export class CacheService {
     try {
       const redis = getRedisClient();
 
+      // If Redis is not available, return zeros
+      if (!redis) {
+        return {
+          totalKeys: 0,
+          linkKeys: 0,
+          analyticsKeys: 0,
+          hotLinksCount: 0,
+        };
+      }
+
       const linkKeys = await redis.keys(`${CACHE_PREFIX.LINK}*`);
       const analyticsKeys = await redis.keys(`${CACHE_PREFIX.ANALYTICS}*`);
       const hotLinksCount = await redis.zCard(CACHE_PREFIX.HOT_LINKS);
@@ -282,6 +356,12 @@ export class CacheService {
   static async incrementCachedClicks(slug: string): Promise<void> {
     try {
       const redis = getRedisClient();
+
+      // If Redis is not available, skip increment silently
+      if (!redis) {
+        return;
+      }
+
       const cacheKey = `${CACHE_PREFIX.LINK_SLUG}${slug}`;
 
       const cached = await redis.get(cacheKey);

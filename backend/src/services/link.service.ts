@@ -305,7 +305,7 @@ class LinkService {
       }
 
       const redis = getRedisClient();
-      if (redis.isReady) {
+      if (redis && redis.isReady) {
         const cacheKey = `link:slug:${slug}`;
         const cacheData = JSON.stringify({
           originalUrl: link.originalUrl,
@@ -329,7 +329,7 @@ class LinkService {
   async getLinkBySlug(slug: string): Promise<ILinkDocument | null> {
     try {
       const redis = getRedisClient();
-      if (redis.isReady) {
+      if (redis && redis.isReady) {
         const cacheKey = `link:slug:${slug}`;
         const cached = await redis.get(cacheKey);
 
@@ -341,7 +341,7 @@ class LinkService {
 
       const link = await Link.findOne({ slug });
 
-      if (link && redis.isReady) {
+      if (link && redis && redis.isReady) {
         const cacheKey = `link:slug:${slug}`;
         const cacheData = JSON.stringify({
           originalUrl: link.originalUrl,
@@ -447,17 +447,21 @@ class LinkService {
 
       const cacheKey = `${this.CACHE_PREFIX}${linkId}`;
       const redis = getRedisClient();
-      const cachedLink = await redis.get(cacheKey);
 
-      if (cachedLink) {
-        const link = JSON.parse(cachedLink) as ILinkDocument;
+      // Try to get from cache if Redis is available
+      if (redis && redis.isReady) {
+        const cachedLink = await redis.get(cacheKey);
 
-        if (link.userId.toString() !== userId) {
-          throw new ForbiddenError('You do not have permission to access this link');
+        if (cachedLink) {
+          const link = JSON.parse(cachedLink) as ILinkDocument;
+
+          if (link.userId && link.userId.toString() !== userId) {
+            throw new ForbiddenError('You do not have permission to access this link');
+          }
+
+          logger.debug(`Link ${linkId} retrieved from cache`);
+          return link;
         }
-
-        logger.debug(`Link ${linkId} retrieved from cache`);
-        return link;
       }
 
       const link = await Link.findById(linkId)
@@ -468,13 +472,16 @@ class LinkService {
         throw new NotFoundError('Link not found');
       }
 
-      if (link.userId.toString() !== userId) {
+      if (link.userId && link.userId.toString() !== userId) {
         throw new ForbiddenError('You do not have permission to access this link');
       }
 
-      await redis.set(cacheKey, JSON.stringify(link), {
-        EX: this.CACHE_TTL,
-      });
+      // Cache if Redis is available
+      if (redis && redis.isReady) {
+        await redis.set(cacheKey, JSON.stringify(link), {
+          EX: this.CACHE_TTL,
+        });
+      }
 
       logger.info(`Link ${linkId} retrieved for user ${userId}`);
       return link as unknown as ILinkDocument;
@@ -500,7 +507,7 @@ class LinkService {
         throw new NotFoundError('Link not found');
       }
 
-      if (link.userId.toString() !== userId) {
+      if (link.userId && link.userId.toString() !== userId) {
         throw new ForbiddenError('You do not have permission to update this link');
       }
 
@@ -540,7 +547,7 @@ class LinkService {
         throw new NotFoundError('Link not found');
       }
 
-      if (link.userId.toString() !== userId) {
+      if (link.userId && link.userId.toString() !== userId) {
         throw new ForbiddenError('You do not have permission to delete this link');
       }
 
@@ -640,7 +647,7 @@ class LinkService {
         throw new NotFoundError('Link not found');
       }
 
-      if (link.userId.toString() !== userId) {
+      if (link.userId && link.userId.toString() !== userId) {
         throw new ForbiddenError('You do not have permission to modify this link');
       }
 
@@ -676,7 +683,7 @@ class LinkService {
         throw new NotFoundError('Link not found');
       }
 
-      if (link.userId.toString() !== userId) {
+      if (link.userId && link.userId.toString() !== userId) {
         throw new ForbiddenError('You do not have permission to view analytics for this link');
       }
 
@@ -763,6 +770,9 @@ class LinkService {
   private async invalidateCache(linkId: string): Promise<void> {
     try {
       const redis = getRedisClient();
+      if (!redis) {
+        return; // Skip if Redis is not available
+      }
       const cacheKey = `${this.CACHE_PREFIX}${linkId}`;
       await redis.del(cacheKey);
       logger.debug(`Cache invalidated for link ${linkId}`);

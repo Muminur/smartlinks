@@ -59,19 +59,16 @@ const AnalyticsSchema = new Schema<IAnalyticsDocument, IAnalyticsModel>(
       type: Schema.Types.ObjectId,
       ref: 'Link',
       required: [true, 'Link ID is required'],
-      index: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'User ID is required'],
-      index: true,
     },
     timestamp: {
       type: Date,
       default: Date.now,
       required: [true, 'Timestamp is required'],
-      index: true,
     },
     ip: {
       type: String,
@@ -223,8 +220,9 @@ const AnalyticsSchema = new Schema<IAnalyticsDocument, IAnalyticsModel>(
 );
 
 // Indexes
-AnalyticsSchema.index({ linkId: 1, timestamp: -1 });
-AnalyticsSchema.index({ userId: 1, timestamp: -1 });
+// Compound indexes (these are more specific than single-field indexes)
+AnalyticsSchema.index({ linkId: 1, timestamp: -1 }); // For link analytics sorted by time
+AnalyticsSchema.index({ userId: 1, timestamp: -1 }); // For user analytics sorted by time
 AnalyticsSchema.index({ timestamp: 1 }, { expireAfterSeconds: 63072000 }); // TTL: 2 years (730 days)
 AnalyticsSchema.index({ 'device.type': 1 });
 AnalyticsSchema.index({ 'location.countryCode': 1 });

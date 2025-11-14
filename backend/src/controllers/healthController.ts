@@ -35,8 +35,12 @@ export const readinessCheck = asyncHandler(async (_req: Request, res: Response):
   // Check Redis connection
   try {
     const redisClient = getRedisClient();
-    const pong = await redisClient.ping();
-    checks.redis = pong === 'PONG';
+    if (redisClient) {
+      const pong = await redisClient.ping();
+      checks.redis = pong === 'PONG';
+    } else {
+      checks.redis = false;
+    }
   } catch {
     checks.redis = false;
   }

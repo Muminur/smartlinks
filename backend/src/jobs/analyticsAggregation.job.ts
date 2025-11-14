@@ -93,7 +93,9 @@ export async function aggregateDailyStats(): Promise<void> {
 
         // Store in Redis with 90-day expiration
         const cacheKey = `daily-stats:${linkId}:${dailyStats.date}`;
-        await redis.setEx(cacheKey, 90 * 24 * 60 * 60, JSON.stringify(dailyStats));
+        if (redis) {
+          await redis.setEx(cacheKey, 90 * 24 * 60 * 60, JSON.stringify(dailyStats));
+        }
 
         logger.debug(`Daily stats aggregated for link ${linkId}: ${clicks} clicks`);
       } catch (error) {
@@ -200,7 +202,9 @@ export async function aggregateWeeklyStats(): Promise<void> {
 
         // Store in Redis with 1-year expiration
         const cacheKey = `weekly-stats:${linkId}:${weekKey}`;
-        await redis.setEx(cacheKey, 365 * 24 * 60 * 60, JSON.stringify(weeklyStats));
+        if (redis) {
+          await redis.setEx(cacheKey, 365 * 24 * 60 * 60, JSON.stringify(weeklyStats));
+        }
 
         logger.debug(`Weekly stats aggregated for link ${linkId}: ${clicks} clicks`);
       } catch (error) {
@@ -324,7 +328,9 @@ export async function aggregateMonthlyStats(): Promise<void> {
 
         // Store in Redis with 2-year expiration
         const cacheKey = `monthly-stats:${linkId}:${monthKey}`;
-        await redis.setEx(cacheKey, 2 * 365 * 24 * 60 * 60, JSON.stringify(monthlyStats));
+        if (redis) {
+          await redis.setEx(cacheKey, 2 * 365 * 24 * 60 * 60, JSON.stringify(monthlyStats));
+        }
 
         logger.debug(`Monthly stats aggregated for link ${linkId}: ${clicks} clicks`);
       } catch (error) {
@@ -480,7 +486,9 @@ export async function updateTrendingLinks(): Promise<void> {
 
         // Store top 50 trending links for this user
         const cacheKey = `trending:${userId}`;
-        await redis.setEx(cacheKey, 3600, JSON.stringify(trending.slice(0, 50)));
+        if (redis) {
+          await redis.setEx(cacheKey, 3600, JSON.stringify(trending.slice(0, 50)));
+        }
 
         logger.debug(`Updated trending links for user ${userId}: ${trending.length} links`);
       } catch (error) {

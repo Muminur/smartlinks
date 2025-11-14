@@ -153,8 +153,8 @@ export async function extractUrlMetadataWithCache(
     const key = cacheKey || `metadata:${url}`;
     const cacheDuration = 7 * 24 * 60 * 60; // 7 days in seconds
 
-    // Check cache first
-    if (redisClient.isReady) {
+    // Check cache first if Redis is available
+    if (redisClient && redisClient.isReady) {
       const cached = await redisClient.get(key);
       if (cached) {
         logger.debug(`Metadata cache hit for: ${url}`);
@@ -165,8 +165,8 @@ export async function extractUrlMetadataWithCache(
     // Extract metadata
     const metadata = await extractUrlMetadata(url);
 
-    // Cache the result
-    if (redisClient.isReady && Object.keys(metadata).length > 0) {
+    // Cache the result if Redis is available
+    if (redisClient && redisClient.isReady && Object.keys(metadata).length > 0) {
       await redisClient.setEx(key, cacheDuration, JSON.stringify(metadata));
       logger.debug(`Metadata cached for: ${url}`);
     }

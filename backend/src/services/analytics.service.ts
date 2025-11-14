@@ -89,7 +89,7 @@ async function verifyLinkOwnership(linkId: string, userId: string): Promise<void
     throw new NotFoundError('Link not found');
   }
 
-  if (link.userId.toString() !== userId) {
+  if (link.userId && link.userId.toString() !== userId) {
     throw new ValidationError('You do not have permission to access analytics for this link');
   }
 }
@@ -197,7 +197,7 @@ export async function getAnalyticsSummary(
     // Get unique visitors from Redis
     const redis = getRedisClient();
     const uniqueVisitorsKey = `unique:${linkId}`;
-    const uniqueVisitors = await redis.sCard(uniqueVisitorsKey);
+    const uniqueVisitors = redis ? await redis.sCard(uniqueVisitorsKey) : 0;
 
     // Get clicks by date (daily breakdown)
     const clicksByDate = await Analytics.aggregate([
@@ -951,7 +951,7 @@ export async function getUserAnalytics(userId: string): Promise<UserAnalytics> {
 
     for (const link of userLinks) {
       const uniqueKey = `unique:${link._id}`;
-      const count = await redis.sCard(uniqueKey);
+      const count = redis ? await redis.sCard(uniqueKey) : 0;
       uniqueVisitors += count;
     }
 
@@ -1102,7 +1102,7 @@ export async function compareLinks(
       throw new NotFoundError('One or more links not found');
     }
 
-    const unauthorizedLink = links.find((link) => link.userId.toString() !== userId);
+    const unauthorizedLink = links.find((link) => link.userId && link.userId.toString() !== userId);
     if (unauthorizedLink) {
       throw new ValidationError('You do not have permission to access one or more links');
     }
@@ -1163,7 +1163,7 @@ export async function compareLinks(
     const redis = getRedisClient();
     for (const item of comparison) {
       const uniqueKey = `unique:${item.linkId}`;
-      const uniqueVisitors = await redis.sCard(uniqueKey);
+      const uniqueVisitors = redis ? await redis.sCard(uniqueKey) : 0;
       item.uniqueVisitors = uniqueVisitors;
     }
 
@@ -1316,7 +1316,7 @@ export async function getTrendingLinks(
     // Check cache
     const cacheKey = generateCacheKey('trending', userId, { period, limit });
     const redis = getRedisClient();
-    const cached = await redis.get(cacheKey);
+    const cached = redis ? await redis.get(cacheKey) : null;
 
     if (cached) {
       logger.debug(`Cache HIT for trending links: ${userId}`);
@@ -1449,7 +1449,9 @@ export async function getTrendingLinks(
     );
 
     // Cache for 1 hour
-    await redis.setEx(cacheKey, 3600, JSON.stringify(enrichedTrending));
+    if (redis) {
+      await redis.setEx(cacheKey, 3600, JSON.stringify(enrichedTrending));
+    }
 
     return enrichedTrending;
   } catch (error) {
@@ -1538,7 +1540,7 @@ export async function getPerformanceMetrics(linkId: string, userId: string): Pro
     // Unique visitors (from Redis)
     const redis = getRedisClient();
     const uniqueVisitorsKey = `unique:${linkId}`;
-    const uniqueVisitors = await redis.sCard(uniqueVisitorsKey);
+    const uniqueVisitors = redis ? await redis.sCard(uniqueVisitorsKey) : 0;
 
     // Calculate engagement rate (unique visitors / total clicks)
     const engagementRate = totalClicks > 0 ? (uniqueVisitors / totalClicks) * 100 : 0;
@@ -1585,7 +1587,7 @@ export async function generateCustomReport(userId: string, config: any): Promise
       throw new NotFoundError('One or more links not found');
     }
 
-    const unauthorizedLink = links.find((link) => link.userId.toString() !== userId);
+    const unauthorizedLink = links.find((link) => link.userId && link.userId.toString() !== userId);
     if (unauthorizedLink) {
       throw new ValidationError('You do not have permission to access one or more links');
     }
@@ -1741,7 +1743,7 @@ export async function getAnalyticsAlerts(userId: string): Promise<any> {
     // Check cache
     const cacheKey = generateCacheKey('alerts', userId);
     const redis = getRedisClient();
-    const cached = await redis.get(cacheKey);
+    const cached = redis ? await redis.get(cacheKey) : null;
 
     if (cached) {
       logger.debug(`Cache HIT for analytics alerts: ${userId}`);
@@ -1896,7 +1898,9 @@ export async function getAnalyticsAlerts(userId: string): Promise<any> {
     }
 
     // Cache for 5 minutes
-    await redis.setEx(cacheKey, 300, JSON.stringify(alerts));
+    if (redis) {
+      await redis.setEx(cacheKey, 300, JSON.stringify(alerts));
+    }
 
     return alerts;
   } catch (error) {

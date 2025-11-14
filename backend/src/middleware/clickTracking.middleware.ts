@@ -191,6 +191,7 @@ export const trackUniqueVisitor = async (slug: string, ip: string): Promise<bool
     const uniqueKey = `unique:${slug}:${today}`;
 
     // Check if IP already visited today
+    if (!redis) return false;
     const isUnique = await redis.sAdd(uniqueKey, hashedIp);
 
     // Set expiration to 48 hours (cleanup old data)
@@ -215,7 +216,7 @@ export const getUniqueVisitorCount = async (slug: string): Promise<number> => {
     const today = new Date().toISOString().split('T')[0];
     const uniqueKey = `unique:${slug}:${today}`;
 
-    const count = await redis.sCard(uniqueKey);
+    const count = redis ? await redis.sCard(uniqueKey) : 0;
     return count;
   } catch (error) {
     logger.error('Error getting unique visitor count:', error);
@@ -258,6 +259,7 @@ export const isLegitimateClick = async (req: Request, slug: string): Promise<boo
 
     // Check 1: Rate limit per IP (max 10 clicks per minute per link)
     const rateLimitKey = `click-rate:${slug}:${hashedIp}`;
+    if (!redis) return true; // Allow click if Redis unavailable
     const clickCount = await redis.incr(rateLimitKey);
     await redis.expire(rateLimitKey, 60); // 1 minute TTL
 

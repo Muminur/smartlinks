@@ -6,7 +6,7 @@ export interface ILink {
   slug: string;
   originalUrl: string;
   shortUrl: string;
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId;
   domain: string;
   title?: string;
   description?: string;
@@ -86,8 +86,7 @@ const LinkSchema = new Schema<ILinkDocument, ILinkModel>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User ID is required'],
-      index: true,
+      required: false,
     },
     domain: {
       type: String,
@@ -185,12 +184,13 @@ const LinkSchema = new Schema<ILinkDocument, ILinkModel>(
 );
 
 // Indexes
-LinkSchema.index({ slug: 1 }, { unique: true });
-LinkSchema.index({ userId: 1, createdAt: -1 });
+// slug index is already created by unique: true constraint on line 54
+LinkSchema.index({ userId: 1, createdAt: -1 }); // Compound index for user's links sorted by creation date
 LinkSchema.index({ originalUrl: 1 });
 LinkSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true }); // TTL index
 LinkSchema.index({ domain: 1 });
 LinkSchema.index({ tags: 1 });
+// isActive index is created by index: true on line 164
 
 // Pre-save middleware to hash password if provided
 LinkSchema.pre('save', async function (next) {

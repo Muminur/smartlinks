@@ -15,6 +15,7 @@ interface EnvConfig {
   JWT_REFRESH_EXPIRE: string;
   FRONTEND_URL: string;
   CORS_ORIGIN?: string;
+  ENABLE_EMAIL: boolean;
   EMAIL_HOST: string;
   EMAIL_PORT: number;
   EMAIL_USER: string;
@@ -41,6 +42,7 @@ export const config: EnvConfig = {
   JWT_REFRESH_EXPIRE: getEnvVariable('JWT_REFRESH_EXPIRE', '30d'),
   FRONTEND_URL: getEnvVariable('FRONTEND_URL', 'http://localhost:3000'),
   CORS_ORIGIN: process.env.CORS_ORIGIN,
+  ENABLE_EMAIL: getEnvVariable('ENABLE_EMAIL', 'false').toLowerCase() === 'true',
   EMAIL_HOST: getEnvVariable('EMAIL_HOST', 'smtp.gmail.com'),
   EMAIL_PORT: parseInt(getEnvVariable('EMAIL_PORT', '587'), 10),
   EMAIL_USER: getEnvVariable('EMAIL_USER', ''),

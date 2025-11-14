@@ -21,8 +21,11 @@ const startServer = async (): Promise<void> => {
     // Connect to MongoDB
     await connectDB();
 
-    // Connect to Redis
-    await connectRedis();
+    // Connect to Redis (non-blocking - app continues even if Redis fails)
+    connectRedis().catch((error) => {
+      logger.warn('Redis connection failed, but app will continue without caching:', error.message);
+      logger.warn('To enable caching, ensure Redis server is accessible');
+    });
 
     // Start analytics cron jobs in production
     if (config.NODE_ENV === 'production') {

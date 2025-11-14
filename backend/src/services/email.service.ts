@@ -4,30 +4,64 @@ import { logger } from '../utils/logger';
 import { IUserDocument } from '../models/user.model';
 
 class EmailService {
-  private transporter: Transporter;
+  private transporter: Transporter | null = null;
+  private emailEnabled: boolean;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: config.EMAIL_HOST,
-      port: config.EMAIL_PORT,
-      secure: config.EMAIL_PORT === 465, // true for 465, false for other ports
-      auth: {
-        user: config.EMAIL_USER,
-        pass: config.EMAIL_PASSWORD,
-      },
-    });
+    this.emailEnabled = config.ENABLE_EMAIL;
 
-    // Verify connection configuration
-    this.verifyConnection();
+    if (this.emailEnabled) {
+      // Only create transporter if email is enabled
+      this.transporter = nodemailer.createTransport({
+        host: config.EMAIL_HOST,
+        port: config.EMAIL_PORT,
+        secure: config.EMAIL_PORT === 465, // true for 465, false for other ports
+        auth: {
+          user: config.EMAIL_USER,
+          pass: config.EMAIL_PASSWORD,
+        },
+      });
+
+      // Verify connection configuration
+      this.verifyConnection();
+    } else {
+      logger.warn('Email service is DISABLED. Email notifications will be logged but not sent.');
+      logger.info('To enable email service, set ENABLE_EMAIL=true in your .env file');
+    }
   }
 
   private async verifyConnection(): Promise<void> {
+    if (!this.transporter) {
+      return;
+    }
+
     try {
       await this.transporter.verify();
       logger.info('Email service is ready to send messages');
     } catch (error) {
       logger.error('Email service configuration error:', error);
+      logger.warn('Email service will continue in mock mode. Emails will be logged but not sent.');
+      // Don't throw error - allow app to continue
+      this.emailEnabled = false;
+      this.transporter = null;
     }
+  }
+
+  private isEmailEnabled(): boolean {
+    return this.emailEnabled && this.transporter !== null;
+  }
+
+  private logEmailToConsole(mailOptions: any): void {
+    logger.info('='.repeat(80));
+    logger.info('EMAIL MOCK MODE - Email not sent (ENABLE_EMAIL is disabled)');
+    logger.info('='.repeat(80));
+    logger.info(`From: ${mailOptions.from}`);
+    logger.info(`To: ${mailOptions.to}`);
+    logger.info(`Subject: ${mailOptions.subject}`);
+    logger.info('-'.repeat(80));
+    logger.info('Plain Text Content:');
+    logger.info(mailOptions.text);
+    logger.info('='.repeat(80));
   }
 
   async sendVerificationEmail(user: IUserDocument, token: string): Promise<void> {
@@ -82,11 +116,24 @@ class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`Verification email sent to ${user.email}`);
+      if (this.isEmailEnabled()) {
+        await this.transporter!.sendMail(mailOptions);
+        logger.info(`Verification email sent to ${user.email}`);
+      } else {
+        // Mock mode - log email to console instead of sending
+        this.logEmailToConsole(mailOptions);
+        logger.info(`Verification email logged for ${user.email} (not sent - email service disabled)`);
+      }
     } catch (error) {
       logger.error(`Error sending verification email to ${user.email}:`, error);
-      throw new Error('Failed to send verification email');
+      // In development, log error but don't crash the app
+      if (config.NODE_ENV === 'development') {
+        logger.warn('Email sending failed in development mode. Continuing...');
+        this.logEmailToConsole(mailOptions);
+      } else {
+        // In production, throw error
+        throw new Error('Failed to send verification email');
+      }
     }
   }
 
@@ -142,11 +189,24 @@ class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`Password reset email sent to ${user.email}`);
+      if (this.isEmailEnabled()) {
+        await this.transporter!.sendMail(mailOptions);
+        logger.info(`Password reset email sent to ${user.email}`);
+      } else {
+        // Mock mode - log email to console instead of sending
+        this.logEmailToConsole(mailOptions);
+        logger.info(`Password reset email logged for ${user.email} (not sent - email service disabled)`);
+      }
     } catch (error) {
       logger.error(`Error sending password reset email to ${user.email}:`, error);
-      throw new Error('Failed to send password reset email');
+      // In development, log error but don't crash the app
+      if (config.NODE_ENV === 'development') {
+        logger.warn('Email sending failed in development mode. Continuing...');
+        this.logEmailToConsole(mailOptions);
+      } else {
+        // In production, throw error
+        throw new Error('Failed to send password reset email');
+      }
     }
   }
 
@@ -213,11 +273,18 @@ class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`Welcome email sent to ${user.email}`);
+      if (this.isEmailEnabled()) {
+        await this.transporter!.sendMail(mailOptions);
+        logger.info(`Welcome email sent to ${user.email}`);
+      } else {
+        // Mock mode - log email to console instead of sending
+        this.logEmailToConsole(mailOptions);
+        logger.info(`Welcome email logged for ${user.email} (not sent - email service disabled)`);
+      }
     } catch (error) {
       logger.error(`Error sending welcome email to ${user.email}:`, error);
       // Don't throw error for welcome email - it's not critical
+      logger.warn('Welcome email failed but continuing (non-critical)');
     }
   }
 
@@ -269,11 +336,18 @@ class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`Password changed notification sent to ${user.email}`);
+      if (this.isEmailEnabled()) {
+        await this.transporter!.sendMail(mailOptions);
+        logger.info(`Password changed notification sent to ${user.email}`);
+      } else {
+        // Mock mode - log email to console instead of sending
+        this.logEmailToConsole(mailOptions);
+        logger.info(`Password changed notification logged for ${user.email} (not sent - email service disabled)`);
+      }
     } catch (error) {
       logger.error(`Error sending password changed email to ${user.email}:`, error);
       // Don't throw error - it's not critical
+      logger.warn('Password changed notification failed but continuing (non-critical)');
     }
   }
 }
