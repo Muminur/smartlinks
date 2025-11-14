@@ -313,6 +313,7 @@ class LinkService {
           expiresAt: link.expiresAt,
           maxClicks: link.maxClicks,
           clicks: link.clicks,
+          isActive: link.isActive,
         });
         await redis.setEx(cacheKey, 24 * 60 * 60, cacheData);
       }
@@ -349,6 +350,7 @@ class LinkService {
           expiresAt: link.expiresAt,
           maxClicks: link.maxClicks,
           clicks: link.clicks,
+          isActive: link.isActive,
         });
         await redis.setEx(cacheKey, 24 * 60 * 60, cacheData);
       }
