@@ -495,3 +495,80 @@ export const getLinkAnalyticsController = async (
     next(error);
   }
 };
+
+/**
+ * Get QR code for a link
+ * GET /api/links/:id/qr
+ */
+export const getQrCodeController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.id;
+
+    if (!userId) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'User not authenticated',
+        },
+      };
+      res.status(401).json(response);
+      return;
+    }
+
+    const { id } = req.params;
+    const { format = 'png' } = req.query;
+
+    // Get link to verify ownership and get QR code
+    const link = await linkService.getLinkById(id, userId);
+
+    // Check if QR code exists
+    if (!link.qrCode) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'QR_NOT_AVAILABLE',
+          message: 'QR code is not available for this link. Please upgrade to Pro or higher plan.',
+        },
+      };
+      res.status(403).json(response);
+      return;
+    }
+
+    // Handle different output formats
+    if (format === 'download') {
+      // Send QR code as downloadable file
+      const base64Data = link.qrCode.replace(/^data:image\/png;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', `attachment; filename="qr-${link.slug}.png"`);
+      res.send(buffer);
+    } else if (format === 'base64') {
+      // Return base64 data URL
+      const response: ApiResponse = {
+        success: true,
+        data: { qrCode: link.qrCode },
+      };
+      res.status(200).json(response);
+    } else {
+      // Default: display inline
+      const base64Data = link.qrCode.replace(/^data:image\/png;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+      res.send(buffer);
+    }
+
+    logger.info(`QR code retrieved for link ${id} in format ${format}`);
+  } catch (error) {
+    logger.error('Get QR code controller error:', error);
+    next(error);
+  }
+};

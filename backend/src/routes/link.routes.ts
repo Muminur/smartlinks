@@ -9,6 +9,7 @@ import {
   bulkDeleteController,
   toggleLinkStatusController,
   getLinkAnalyticsController,
+  getQrCodeController,
 } from '../controllers/link.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { validateRequest, validateQuery, validateParams } from '../middleware/validateRequest';
@@ -153,6 +154,20 @@ router.get(
   validateParams(linkIdSchema),
   validateQuery(analyticsQuerySchema),
   getLinkAnalyticsController
+);
+
+/**
+ * @route   GET /api/links/:id/qr
+ * @desc    Get QR code for a link (supports multiple formats)
+ * @access  Private
+ * @params  id - Link ID
+ * @query   format - Output format: 'png' (default), 'base64', 'download'
+ */
+router.get(
+  '/:id/qr',
+  authenticateToken,
+  validateParams(linkIdSchema),
+  getQrCodeController
 );
 
 export default router;

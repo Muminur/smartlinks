@@ -13,6 +13,7 @@ import {
 import { PaginatedResponse } from '../types';
 import { generateUniqueSlug, isValidCustomSlug, isSlugAvailable, isReservedSlug } from '../utils/slugGenerator';
 import { extractUrlMetadataWithCache, isSafeUrl } from '../utils/metadataExtractor';
+import { generateQRCode, isQRCodeEnabled } from '../utils/qrGenerator';
 
 interface GetLinksFilters {
   page?: number;
@@ -278,6 +279,18 @@ class LinkService {
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
       const shortUrl = `${protocol}://${domain}/${slug}`;
 
+      // Generate QR code if enabled and user has access
+      let qrCodeDataURL: string | undefined;
+      if (isQRCodeEnabled() && limits.qrCode) {
+        try {
+          qrCodeDataURL = await generateQRCode(shortUrl);
+          logger.info(`QR code generated for link: ${shortUrl}`);
+        } catch (error) {
+          logger.warn(`QR code generation failed for ${shortUrl}:`, error);
+          // Continue without QR code - don't fail link creation
+        }
+      }
+
       const link = new Link({
         slug,
         originalUrl: linkData.originalUrl,
@@ -288,6 +301,7 @@ class LinkService {
         description: linkData.description,
         tags: linkData.tags || [],
         metadata,
+        qrCode: qrCodeDataURL,
         password: linkData.password,
         expiresAt: linkData.expiresAt,
         maxClicks: linkData.maxClicks,
