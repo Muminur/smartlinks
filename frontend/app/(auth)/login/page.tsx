@@ -75,10 +75,10 @@ function LoginContent() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl p-8">
+    <div className="bg-card rounded-lg shadow-xl p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-        <p className="mt-2 text-gray-600">
+        <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
+        <p className="mt-2 text-muted-foreground">
           Sign in to your account to continue
         </p>
       </div>
@@ -107,7 +107,7 @@ function LoginContent() {
           error={errors.email?.message}
           icon={
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-5 w-5 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -159,10 +159,10 @@ function LoginContent() {
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-background text-muted-foreground">
               Or continue with
             </span>
           </div>
@@ -218,7 +218,7 @@ function LoginContent() {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-600">
+      <p className="mt-8 text-center text-sm text-muted-foreground">
         Don't have an account?{' '}
         <Link
           href="/register"
@@ -233,8 +233,8 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="bg-white rounded-lg shadow-xl p-8 flex items-center justify-center min-h-[400px]">
-      <div className="text-gray-600">Loading...</div>
+    <Suspense fallback={<div className="bg-card rounded-lg shadow-xl p-8 flex items-center justify-center min-h-[400px]">
+      <div className="text-muted-foreground">Loading...</div>
     </div>}>
       <LoginContent />
     </Suspense>
