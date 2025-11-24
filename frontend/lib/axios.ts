@@ -145,6 +145,20 @@ api.interceptors.response.use(
     // Handle 429 Too Many Requests
     if (error.response?.status === 429) {
       console.error('Rate limit exceeded');
+      // Extract retry-after header if available
+      const retryAfter = error.response.headers['retry-after'];
+      const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000; // Default to 60 seconds
+
+      // Store rate limit info for UI feedback
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('rate-limit', {
+          detail: {
+            endpoint: originalRequest.url,
+            retryAfter: waitTime / 1000,
+            message: `Rate limit exceeded. Please try again in ${Math.ceil(waitTime / 1000)} seconds.`
+          }
+        }));
+      }
     }
 
     // Handle 500 Server Error

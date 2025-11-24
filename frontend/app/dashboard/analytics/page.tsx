@@ -21,6 +21,7 @@ import PerformanceMetrics from '@/components/analytics/PerformanceMetrics';
 import TrafficSourcesChart from '@/components/analytics/TrafficSourcesChart';
 import type { DateRange } from '@/types/analytics';
 import { subDays } from 'date-fns';
+import { getLinks } from '@/lib/api/links';
 
 export default function AnalyticsPage() {
   const [selectedLink, setSelectedLink] = useState<string>('all');
@@ -36,8 +37,7 @@ export default function AnalyticsPage() {
   const { data: links } = useQuery({
     queryKey: ['links'],
     queryFn: async () => {
-      const response = await fetch('/api/links');
-      return response.json();
+      return await getLinks();
     },
   });
 

@@ -7,6 +7,7 @@ import type {
   PaginatedResponse,
   ApiResponse,
 } from '@/types';
+import { debounceAsync } from '@/lib/utils/debounce';
 
 /**
  * Links API Client
@@ -19,7 +20,7 @@ export async function getLinks(
   params?: LinkFilters & { page?: number; limit?: number }
 ): Promise<PaginatedResponse<Link>> {
   const response = await api.get<ApiResponse<PaginatedResponse<Link>>>(
-    '/api/links',
+    '/links',
     { params }
   );
   return response.data.data!;
@@ -29,7 +30,7 @@ export async function getLinks(
  * Get a single link by ID
  */
 export async function getLinkById(id: string): Promise<Link> {
-  const response = await api.get<ApiResponse<Link>>(`/api/links/${id}`);
+  const response = await api.get<ApiResponse<Link>>(`/links/${id}`);
   return response.data.data!;
 }
 
@@ -37,7 +38,7 @@ export async function getLinkById(id: string): Promise<Link> {
  * Get a single link by slug
  */
 export async function getLinkBySlug(slug: string): Promise<Link> {
-  const response = await api.get<ApiResponse<Link>>(`/api/links/slug/${slug}`);
+  const response = await api.get<ApiResponse<Link>>(`/links/slug/${slug}`);
   return response.data.data!;
 }
 
@@ -46,7 +47,7 @@ export async function getLinkBySlug(slug: string): Promise<Link> {
  */
 export async function createLink(data: CreateLinkData): Promise<Link> {
   const response = await api.post<ApiResponse<Link>>(
-    '/api/links/shorten',
+    '/links/shorten',
     data
   );
   return response.data.data!;
@@ -59,7 +60,7 @@ export async function updateLink(
   id: string,
   data: UpdateLinkData
 ): Promise<Link> {
-  const response = await api.put<ApiResponse<Link>>(`/api/links/${id}`, data);
+  const response = await api.put<ApiResponse<Link>>(`/links/${id}`, data);
   return response.data.data!;
 }
 
@@ -67,14 +68,14 @@ export async function updateLink(
  * Delete a link
  */
 export async function deleteLink(id: string): Promise<void> {
-  await api.delete(`/api/links/${id}`);
+  await api.delete(`/links/${id}`);
 }
 
 /**
  * Bulk delete links
  */
 export async function bulkDeleteLinks(linkIds: string[]): Promise<void> {
-  await api.post('/api/links/bulk-delete', { linkIds });
+  await api.post('/links/bulk-delete', { linkIds });
 }
 
 /**
@@ -85,7 +86,7 @@ export async function toggleLinkStatus(
   isActive: boolean
 ): Promise<Link> {
   const response = await api.patch<ApiResponse<Link>>(
-    `/api/links/${id}/status`,
+    `/links/${id}/status`,
     { isActive }
   );
   return response.data.data!;
@@ -98,10 +99,19 @@ export async function checkSlugAvailability(
   slug: string
 ): Promise<{ available: boolean }> {
   const response = await api.get<ApiResponse<{ available: boolean }>>(
-    `/api/links/check-slug/${slug}`
+    `/links/check-slug/${slug}`
   );
   return response.data.data!;
 }
+
+/**
+ * Debounced version of checkSlugAvailability to prevent rate limiting
+ * Waits 500ms after the last call before making the API request
+ */
+export const checkSlugAvailabilityDebounced = debounceAsync(
+  checkSlugAvailability,
+  500
+);
 
 /**
  * Get link preview metadata
@@ -121,7 +131,7 @@ export async function getLinkPreview(
       image?: string;
       favicon?: string;
     }>
-  >('/api/links/preview', { url });
+  >('/links/preview', { url });
   return response.data.data!;
 }
 
@@ -132,7 +142,7 @@ export async function generateQRCode(
   linkId: string
 ): Promise<{ qrCode: string }> {
   const response = await api.post<ApiResponse<{ qrCode: string }>>(
-    `/api/links/${linkId}/qr-code`
+    `/links/${linkId}/qr-code`
   );
   return response.data.data!;
 }
@@ -157,7 +167,7 @@ export async function getLinkAnalytics(linkId: string): Promise<{
       clicksByDevice: { device: string; clicks: number }[];
       clicksByBrowser: { browser: string; clicks: number }[];
     }>
-  >(`/api/analytics/${linkId}/summary`);
+  >(`/analytics/${linkId}/summary`);
   return response.data.data!;
 }
 
@@ -172,7 +182,7 @@ export async function exportLinks(
     endDate?: string;
   }
 ): Promise<Blob> {
-  const response = await api.get('/api/links/export', {
+  const response = await api.get('/links/export', {
     params: { format, ...params },
     responseType: 'blob',
   });
@@ -196,7 +206,7 @@ export async function importLinks(file: File): Promise<{
       failed: number;
       errors?: Array<{ row: number; error: string }>;
     }>
-  >('/api/links/import', formData, {
+  >('/links/import', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -211,13 +221,13 @@ export async function bulkAddTags(
   linkIds: string[],
   tags: string[]
 ): Promise<void> {
-  await api.post('/api/links/bulk-tags', { linkIds, tags });
+  await api.post('/links/bulk-tags', { linkIds, tags });
 }
 
 /**
  * Get all unique tags
  */
 export async function getAllTags(): Promise<string[]> {
-  const response = await api.get<ApiResponse<string[]>>('/api/links/tags');
+  const response = await api.get<ApiResponse<string[]>>('/links/tags');
   return response.data.data!;
 }

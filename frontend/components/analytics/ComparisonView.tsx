@@ -20,6 +20,8 @@ import {
 import { API_ENDPOINTS, CHART_COLORS } from '@/lib/constants';
 import type { DateRange, ComparisonData } from '@/types/analytics';
 import { format } from 'date-fns';
+import { getLinks } from '@/lib/api/links';
+import { api } from '@/lib/axios';
 
 interface ComparisonViewProps {
   dateRange: DateRange;
@@ -33,8 +35,7 @@ export default function ComparisonView({ dateRange }: ComparisonViewProps) {
   const { data: linksData } = useQuery({
     queryKey: ['links'],
     queryFn: async () => {
-      const response = await fetch('/api/links');
-      return response.json();
+      return await getLinks();
     },
   });
 
@@ -52,9 +53,8 @@ export default function ComparisonView({ dateRange }: ComparisonViewProps) {
         endDate: dateRange.end.toISOString(),
       });
 
-      const response = await fetch(API_ENDPOINTS.ANALYTICS.COMPARE + `?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch comparison data');
-      return response.json();
+      const response = await api.get(API_ENDPOINTS.ANALYTICS.COMPARE, { params: Object.fromEntries(params) });
+      return response.data;
     },
     enabled: !!link1Id && !!link2Id,
   });
