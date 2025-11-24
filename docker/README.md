@@ -1,6 +1,6 @@
 # Docker Configuration Guide
 
-This directory contains all Docker-related configuration files for the TinyURL Clone project.
+This directory contains all Docker-related configuration files for the Shortlinks project.
 
 ## Directory Structure
 

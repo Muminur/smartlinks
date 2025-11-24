@@ -56,7 +56,7 @@ app.use('/api', routes);
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'TinyURL Clone API Server',
+    message: 'Shortlinks API Server',
     version: '1.0.0',
     documentation: '/api/docs',
   });

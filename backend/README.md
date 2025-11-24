@@ -1,6 +1,6 @@
-# TinyURL Clone - Backend API
+# Shortlinks - Backend API
 
-Backend API server for the TinyURL Clone project, built with Express.js, TypeScript, MongoDB, and Redis.
+Backend API server for the Shortlinks project, built with Express.js, TypeScript, MongoDB, and Redis.
 
 ## Tech Stack
 

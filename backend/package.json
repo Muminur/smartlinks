@@ -1,7 +1,7 @@
 {
   "name": "tinyurl-backend",
   "version": "1.0.0",
-  "description": "Backend API server for TinyURL Clone - A production-ready link shortening platform",
+  "description": "Backend API server for Shortlinks - A production-ready link shortening platform",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
@@ -29,7 +29,7 @@
     "redis",
     "rest-api"
   ],
-  "author": "TinyURL Clone Team",
+  "author": "Shortlinks Team",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {

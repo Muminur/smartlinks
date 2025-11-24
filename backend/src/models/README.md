@@ -1,6 +1,6 @@
 # Database Models Documentation
 
-This directory contains all Mongoose database schemas for the TinyURL Clone application.
+This directory contains all Mongoose database schemas for the Shortlinks application.
 
 ## Overview
 

@@ -1,5 +1,5 @@
 # ==============================================
-# TinyURL Clone - Makefile
+# Shortlinks - Makefile
 # Quick commands for Docker and development
 # ==============================================
 
@@ -17,7 +17,7 @@ NC := \033[0m # No Color
 
 ## help: Show this help message
 help:
-	@echo "$(BLUE)TinyURL Clone - Available Commands$(NC)"
+	@echo "$(BLUE)Shortlinks - Available Commands$(NC)"
 	@echo ""
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 

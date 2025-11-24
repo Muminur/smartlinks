@@ -68,7 +68,7 @@ class EmailService {
     const verificationUrl = `${config.FRONTEND_URL}/verify-email/${token}`;
 
     const mailOptions = {
-      from: `"TinyURL Clone" <${config.EMAIL_FROM}>`,
+      from: `"Shortlinks" <${config.EMAIL_FROM}>`,
       to: user.email,
       subject: 'Verify Your Email Address',
       html: `
@@ -81,7 +81,7 @@ class EmailService {
           </head>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="color: white; margin: 0;">Welcome to TinyURL Clone!</h1>
+              <h1 style="color: white; margin: 0;">Welcome to Shortlinks!</h1>
             </div>
             <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
               <h2 style="color: #667eea;">Hello ${user.name},</h2>
@@ -94,13 +94,13 @@ class EmailService {
               <p style="color: #999; font-size: 12px; margin-top: 30px;">This link will expire in 24 hours. If you didn't create an account, please ignore this email.</p>
             </div>
             <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-              <p>&copy; ${new Date().getFullYear()} TinyURL Clone. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Shortlinks. All rights reserved.</p>
             </div>
           </body>
         </html>
       `,
       text: `
-        Welcome to TinyURL Clone!
+        Welcome to Shortlinks!
 
         Hello ${user.name},
 
@@ -111,7 +111,7 @@ class EmailService {
         This link will expire in 24 hours. If you didn't create an account, please ignore this email.
 
         Best regards,
-        TinyURL Clone Team
+        Shortlinks Team
       `,
     };
 
@@ -141,7 +141,7 @@ class EmailService {
     const resetUrl = `${config.FRONTEND_URL}/reset-password/${token}`;
 
     const mailOptions = {
-      from: `"TinyURL Clone" <${config.EMAIL_FROM}>`,
+      from: `"Shortlinks" <${config.EMAIL_FROM}>`,
       to: user.email,
       subject: 'Password Reset Request',
       html: `
@@ -167,7 +167,7 @@ class EmailService {
               <p style="color: #999; font-size: 12px; margin-top: 30px;">This link will expire in 1 hour. If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
             </div>
             <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-              <p>&copy; ${new Date().getFullYear()} TinyURL Clone. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Shortlinks. All rights reserved.</p>
             </div>
           </body>
         </html>
@@ -184,7 +184,7 @@ class EmailService {
         This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
 
         Best regards,
-        TinyURL Clone Team
+        Shortlinks Team
       `,
     };
 
@@ -214,9 +214,9 @@ class EmailService {
     const dashboardUrl = `${config.FRONTEND_URL}/dashboard`;
 
     const mailOptions = {
-      from: `"TinyURL Clone" <${config.EMAIL_FROM}>`,
+      from: `"Shortlinks" <${config.EMAIL_FROM}>`,
       to: user.email,
-      subject: 'Welcome to TinyURL Clone!',
+      subject: 'Welcome to Shortlinks!',
       html: `
         <!DOCTYPE html>
         <html>
@@ -245,13 +245,13 @@ class EmailService {
               <p style="color: #666; font-size: 14px; margin-top: 30px;">Need help? Check out our documentation or contact our support team.</p>
             </div>
             <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-              <p>&copy; ${new Date().getFullYear()} TinyURL Clone. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Shortlinks. All rights reserved.</p>
             </div>
           </body>
         </html>
       `,
       text: `
-        Welcome to TinyURL Clone!
+        Welcome to Shortlinks!
 
         Hello ${user.name},
 
@@ -268,7 +268,7 @@ class EmailService {
         Need help? Check out our documentation or contact our support team.
 
         Best regards,
-        TinyURL Clone Team
+        Shortlinks Team
       `,
     };
 
@@ -290,7 +290,7 @@ class EmailService {
 
   async sendPasswordChangedEmail(user: IUserDocument): Promise<void> {
     const mailOptions = {
-      from: `"TinyURL Clone" <${config.EMAIL_FROM}>`,
+      from: `"Shortlinks" <${config.EMAIL_FROM}>`,
       to: user.email,
       subject: 'Your Password Has Been Changed',
       html: `
@@ -314,7 +314,7 @@ class EmailService {
               </div>
             </div>
             <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-              <p>&copy; ${new Date().getFullYear()} TinyURL Clone. All rights reserved.</p>
+              <p>&copy; ${new Date().getFullYear()} Shortlinks. All rights reserved.</p>
             </div>
           </body>
         </html>
@@ -331,7 +331,7 @@ class EmailService {
         Security Tip: Never share your password with anyone and use a unique, strong password for your account.
 
         Best regards,
-        TinyURL Clone Team
+        Shortlinks Team
       `,
     };
 

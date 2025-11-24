@@ -34,7 +34,7 @@ describe('Health Check Endpoints', () => {
       expect(response.body.success).toBe(true);
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('version');
-      expect(response.body.message).toBe('TinyURL Clone API Server');
+      expect(response.body.message).toBe('Shortlinks API Server');
     });
   });
 

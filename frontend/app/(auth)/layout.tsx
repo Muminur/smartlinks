@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Authentication - TinyURL Clone',
+  title: 'Authentication - Shortlinks',
   description: 'Sign in or create an account to start shortening URLs',
 };
 
@@ -15,7 +15,7 @@ export default function AuthLayout({
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 p-12 items-center justify-center">
         <div className="max-w-md text-white">
-          <h1 className="text-4xl font-bold mb-6">TinyURL Clone</h1>
+          <h1 className="text-4xl font-bold mb-6">Shortlinks</h1>
           <p className="text-xl text-blue-100 mb-8">
             Create short, memorable links that drive engagement and track
             performance.
@@ -94,7 +94,7 @@ export default function AuthLayout({
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
             <h1 className="text-3xl font-bold text-blue-600">
-              TinyURL Clone
+              Shortlinks
             </h1>
           </div>
 
