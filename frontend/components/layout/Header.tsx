@@ -149,10 +149,10 @@ export function Header() {
                   <p className="text-xs leading-none text-muted-foreground">
                     {user?.email || 'user@example.com'}
                   </p>
-                  {user?.plan && (
+                  {user?.plan?.type && (
                     <p className="text-xs leading-none text-muted-foreground">
                       <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mt-1">
-                        {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} Plan
+                        {user.plan.type.charAt(0).toUpperCase() + user.plan.type.slice(1)} Plan
                       </span>
                     </p>
                   )}

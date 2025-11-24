@@ -4,7 +4,12 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  plan: 'free' | 'pro' | 'enterprise';
+  plan: {
+    type: 'free' | 'pro' | 'business' | 'enterprise';
+    startDate: string;
+    endDate: string | null;
+    autoRenew: boolean;
+  };
   createdAt: string;
   updatedAt: string;
 }
