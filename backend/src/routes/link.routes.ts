@@ -21,7 +21,7 @@ import {
   linkIdSchema,
   analyticsQuerySchema,
 } from '../middleware/link.validation';
-import { createLinkLimiter } from '../middleware/rateLimiter';
+import { createLinkLimiterForGuests } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -37,7 +37,7 @@ const router = Router();
  */
 router.post(
   '/public/shorten',
-  createLinkLimiter,
+  createLinkLimiterForGuests, // Use guest-specific rate limiter for public endpoint
   validateRequest(shortenUrlSchema),
   shortenUrlPublicController
 );
@@ -51,11 +51,13 @@ router.post(
  * @desc    Shorten a URL (create a shortened link)
  * @access  Private
  * @body    originalUrl, customSlug, title, description, tags, expiresAt, maxClicks, password, domain, utm
+ * @note   No rate limiting for authenticated users - they have plan-based quotas instead
  */
 router.post(
   '/shorten',
   authenticateToken,
-  createLinkLimiter,
+  // Rate limiting removed for authenticated users - they have plan-based quotas
+  // If you want to add a very high safety limit, use: conditionalRateLimit(createLinkLimiterForAuthUsers)
   validateRequest(shortenUrlSchema),
   shortenUrlController
 );

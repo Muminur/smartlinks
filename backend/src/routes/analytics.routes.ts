@@ -23,6 +23,7 @@ import {
   validateCompareLinksQuery,
   validateLinkAnalyticsQuery,
 } from '../middleware/analytics.validation';
+import { conditionalRateLimit } from '../middleware/smartRateLimiter';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -46,14 +47,16 @@ const analyticsRateLimiter = rateLimit({
 });
 
 /**
- * Apply rate limiter to all analytics routes
- */
-router.use(analyticsRateLimiter);
-
-/**
  * All analytics routes require authentication
  */
 router.use(authenticateToken);
+
+/**
+ * Apply conditional rate limiter only to unauthenticated users
+ * Note: Since all analytics routes require authentication, this is mostly a safety measure
+ * Authenticated users will not be rate-limited
+ */
+router.use(conditionalRateLimit(analyticsRateLimiter));
 
 /**
  * GET /api/analytics/link/:linkId

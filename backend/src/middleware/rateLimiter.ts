@@ -75,6 +75,58 @@ export const createLinkLimiter = rateLimit({
 });
 
 /**
+ * Rate limiter specifically for guest/non-authenticated users
+ * More restrictive than authenticated users
+ */
+export const createLinkLimiterForGuests = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit guest users to 10 link creations per hour
+  skipSuccessfulRequests: false,
+  message: {
+    success: false,
+    error: {
+      code: 'GUEST_LINK_LIMIT_EXCEEDED',
+      message: 'Guest users can only create 10 links per hour. Sign up for unlimited access.',
+    },
+  },
+  handler: (_req: Request, res: Response): void => {
+    res.status(429).json({
+      success: false,
+      error: {
+        code: 'GUEST_LINK_LIMIT_EXCEEDED',
+        message: 'Guest users can only create 10 links per hour. Sign up for unlimited access.',
+      },
+    });
+  },
+});
+
+/**
+ * Rate limiter specifically for authenticated users
+ * Very high limits to avoid blocking legitimate users
+ */
+export const createLinkLimiterForAuthUsers = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 1000, // Limit authenticated users to 1000 link creations per hour (virtually unlimited)
+  skipSuccessfulRequests: false,
+  message: {
+    success: false,
+    error: {
+      code: 'AUTH_USER_LINK_LIMIT_EXCEEDED',
+      message: 'You have reached the maximum link creation limit. Please contact support if you need higher limits.',
+    },
+  },
+  handler: (_req: Request, res: Response): void => {
+    res.status(429).json({
+      success: false,
+      error: {
+        code: 'AUTH_USER_LINK_LIMIT_EXCEEDED',
+        message: 'You have reached the maximum link creation limit. Please contact support if you need higher limits.',
+      },
+    });
+  },
+});
+
+/**
  * Plan-based rate limiters
  * These can be applied based on user's subscription plan
  *
@@ -153,4 +205,11 @@ export const enterprisePlanLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10000, // Effectively unlimited
   skipSuccessfulRequests: false,
+});
+
+// No-op limiter for authenticated users (effectively no limit)
+export const noOpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 100000, // Extremely high limit that will never be reached
+  skip: () => true, // Skip all requests
 });
