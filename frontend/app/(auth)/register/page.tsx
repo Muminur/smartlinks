@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -14,7 +14,7 @@ import { Alert } from '@/components/ui/Alert';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -279,5 +279,30 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="bg-white rounded-lg shadow-xl p-8">
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+        <div className="space-y-4">
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <RegisterForm />
+    </Suspense>
   );
 }
