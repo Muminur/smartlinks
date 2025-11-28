@@ -78,8 +78,8 @@ function LoginContent() {
   return (
     <div className="bg-card rounded-lg shadow-xl p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
-        <p className="mt-2 text-muted-foreground">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
+        <p className="mt-2 text-gray-700 dark:text-gray-300">
           Sign in to your account to continue
         </p>
       </div>
@@ -133,7 +133,7 @@ function LoginContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Checkbox id="rememberMe" {...register('rememberMe')} />
-            <Label htmlFor="rememberMe" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <Label htmlFor="rememberMe" className="text-sm font-medium leading-none text-gray-900 dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Remember me
             </Label>
           </div>
@@ -163,7 +163,7 @@ function LoginContent() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-card text-muted-foreground">
+            <span className="px-2 bg-card text-gray-700 dark:text-gray-300">
               Or continue with
             </span>
           </div>
@@ -219,7 +219,7 @@ function LoginContent() {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-muted-foreground">
+      <p className="mt-8 text-center text-sm text-gray-700 dark:text-gray-300">
         Don&apos;t have an account?{' '}
         <Link
           href="/register"

@@ -80,12 +80,12 @@ function RegisterForm() {
       <div className="bg-card rounded-lg shadow-xl p-8">
         <Alert variant="success" className="mb-6">
           <div>
-            <h3 className="font-semibold mb-2 text-foreground">Account created successfully!</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Account created successfully!</h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               We&apos;ve sent a verification email to your inbox. Please verify your
               email address before logging in.
             </p>
-            <p className="text-sm mt-2 text-muted-foreground">
+            <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">
               Redirecting to login page...
             </p>
           </div>
@@ -97,8 +97,8 @@ function RegisterForm() {
   return (
     <div className="bg-card rounded-lg shadow-xl p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-foreground">Create an account</h2>
-        <p className="mt-2 text-muted-foreground">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create an account</h2>
+        <p className="mt-2 text-gray-700 dark:text-gray-300">
           Start shortening URLs and tracking analytics
         </p>
       </div>
@@ -174,7 +174,7 @@ function RegisterForm() {
 
         <div className="flex items-start space-x-2">
           <Checkbox id="agreedToTerms" {...register('agreedToTerms')} className="mt-1" />
-          <Label htmlFor="agreedToTerms" className="text-sm font-medium leading-relaxed text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <Label htmlFor="agreedToTerms" className="text-sm font-medium leading-relaxed text-gray-900 dark:text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             I agree to the{' '}
             <Link
               href="/terms"
@@ -214,7 +214,7 @@ function RegisterForm() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-card text-muted-foreground">
+            <span className="px-2 bg-card text-gray-700 dark:text-gray-300">
               Or register with
             </span>
           </div>
@@ -270,7 +270,7 @@ function RegisterForm() {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-muted-foreground">
+      <p className="mt-8 text-center text-sm text-gray-700 dark:text-gray-300">
         Already have an account?{' '}
         <Link
           href="/login"
