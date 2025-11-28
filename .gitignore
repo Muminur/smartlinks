@@ -229,11 +229,8 @@ sandbox/
 # ===================================
 # Documentation Files
 # ===================================
-# Ignore all markdown files except README.md
+# Ignore all markdown files
 *.md
-!README.md
-!readme.md
-!Readme.md
 
 # ===================================
 # Keep These Files
