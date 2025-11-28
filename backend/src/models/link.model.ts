@@ -7,6 +7,7 @@ export interface ILink {
   originalUrl: string;
   shortUrl: string;
   userId?: Types.ObjectId;
+  folderId?: Types.ObjectId;
   domain: string;
   title?: string;
   description?: string;
@@ -87,6 +88,11 @@ const LinkSchema = new Schema<ILinkDocument, ILinkModel>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: false,
+    },
+    folderId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Folder',
+      default: null,
     },
     domain: {
       type: String,
@@ -186,6 +192,8 @@ const LinkSchema = new Schema<ILinkDocument, ILinkModel>(
 // Indexes
 // slug index is already created by unique: true constraint on line 54
 LinkSchema.index({ userId: 1, createdAt: -1 }); // Compound index for user's links sorted by creation date
+LinkSchema.index({ userId: 1, folderId: 1 }); // Index for folder-based queries
+LinkSchema.index({ folderId: 1 }); // Index for folder lookups
 LinkSchema.index({ originalUrl: 1 });
 LinkSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true }); // TTL index
 LinkSchema.index({ domain: 1 });

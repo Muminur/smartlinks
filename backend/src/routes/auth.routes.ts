@@ -12,6 +12,13 @@ import {
   changePasswordController,
 } from '../controllers/auth.controller';
 import {
+  googleAuthController,
+  googleCallbackController,
+  githubAuthController,
+  githubCallbackController,
+  getOAuthUrlsController,
+} from '../controllers/oauth.controller';
+import {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
@@ -143,5 +150,44 @@ router.put(
   validateRequest(changePasswordSchema),
   changePasswordController
 );
+
+// ========================================
+// OAuth Routes
+// ========================================
+
+/**
+ * @route   GET /api/auth/google
+ * @desc    Redirect to Google OAuth
+ * @access  Public
+ */
+router.get('/google', googleAuthController);
+
+/**
+ * @route   GET /api/auth/google/callback
+ * @desc    Handle Google OAuth callback
+ * @access  Public
+ */
+router.get('/google/callback', googleCallbackController);
+
+/**
+ * @route   GET /api/auth/github
+ * @desc    Redirect to GitHub OAuth
+ * @access  Public
+ */
+router.get('/github', githubAuthController);
+
+/**
+ * @route   GET /api/auth/github/callback
+ * @desc    Handle GitHub OAuth callback
+ * @access  Public
+ */
+router.get('/github/callback', githubCallbackController);
+
+/**
+ * @route   GET /api/auth/oauth/urls
+ * @desc    Get OAuth authorization URLs
+ * @access  Public
+ */
+router.get('/oauth/urls', getOAuthUrlsController);
 
 export default router;

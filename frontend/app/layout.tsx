@@ -22,6 +22,12 @@ export const metadata: Metadata = {
   creator: "ShortLinks",
   publisher: "ShortLinks",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ShortLinks",
+  },
   openGraph: {
     title: "ShortLinks - Professional URL Shortener with Analytics",
     description: "Create short links with advanced analytics. Track clicks, understand your audience, and grow your business.",
@@ -69,6 +75,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

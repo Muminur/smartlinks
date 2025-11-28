@@ -13,3 +13,5 @@ export { default as Analytics, IAnalytics, IAnalyticsDocument, IAnalyticsModel }
 export { default as Domain, IDomain, IDomainDocument, IDomainModel } from './domain.model';
 export { default as Plan, IPlan, IPlanDocument, IPlanModel } from './plan.model';
 export { default as Payment, IPayment, IPaymentDocument, IPaymentModel } from './payment.model';
+export { default as Folder, IFolder, IFolderDocument, IFolderModel } from './folder.model';
+export { default as LinkShare, ILinkShare, ILinkShareDocument, ILinkShareModel } from './linkShare.model';
