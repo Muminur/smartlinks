@@ -58,10 +58,11 @@ function RegisterForm() {
       } else {
         setError(response.error?.message || 'Registration failed. Please try again.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       setError(
-        err.response?.data?.error?.message ||
+        error.response?.data?.error?.message ||
           'An error occurred. Please try again.'
       );
     } finally {
@@ -81,7 +82,7 @@ function RegisterForm() {
           <div>
             <h3 className="font-semibold mb-2">Account created successfully!</h3>
             <p className="text-sm">
-              We've sent a verification email to your inbox. Please verify your
+              We&apos;ve sent a verification email to your inbox. Please verify your
               email address before logging in.
             </p>
             <p className="text-sm mt-2">

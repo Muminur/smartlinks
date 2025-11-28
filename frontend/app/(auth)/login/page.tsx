@@ -38,7 +38,7 @@ function LoginContent() {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: { email: string; password: string; rememberMe?: boolean }) => {
     setError(null);
     setIsLoading(true);
 
@@ -58,10 +58,11 @@ function LoginContent() {
       } else {
         setError(response.error?.message || 'Login failed. Please try again.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       setError(
-        err.response?.data?.error?.message ||
+        error.response?.data?.error?.message ||
           'An error occurred. Please try again.'
       );
     } finally {
@@ -219,7 +220,7 @@ function LoginContent() {
       </div>
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <Link
           href="/register"
           className="font-medium text-blue-600 hover:text-blue-500 transition-colors"

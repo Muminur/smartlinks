@@ -65,10 +65,11 @@ function ResetPasswordContent() {
             'Failed to reset password. Please try again.'
         );
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Reset password error:', err);
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       setError(
-        err.response?.data?.error?.message ||
+        error.response?.data?.error?.message ||
           'An error occurred. The reset link may have expired.'
       );
     } finally {
@@ -141,7 +142,7 @@ function ResetPasswordContent() {
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900">Reset your password</h2>
         <p className="mt-2 text-gray-600">
-          Enter your new password below. Make sure it's strong and secure.
+          Enter your new password below. Make sure it&apos;s strong and secure.
         </p>
       </div>
 

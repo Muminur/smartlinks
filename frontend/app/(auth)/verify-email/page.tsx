@@ -42,11 +42,12 @@ function VerifyEmailContent() {
             response.error?.message || 'Email verification failed.'
           );
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Email verification error:', err);
+        const error = err as { response?: { data?: { error?: { message?: string } } } };
         setStatus('error');
         setErrorMessage(
-          err.response?.data?.error?.message ||
+          error.response?.data?.error?.message ||
             'An error occurred during verification. The link may have expired.'
         );
       }
@@ -67,10 +68,11 @@ function VerifyEmailContent() {
       } else {
         alert(response.error?.message || 'Failed to resend verification email.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Resend verification error:', err);
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       alert(
-        err.response?.data?.error?.message ||
+        error.response?.data?.error?.message ||
           'An error occurred. Please try again.'
       );
     } finally {

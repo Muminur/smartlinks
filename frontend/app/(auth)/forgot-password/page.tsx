@@ -44,10 +44,11 @@ export default function ForgotPasswordPage() {
             'Failed to send reset email. Please try again.'
         );
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Forgot password error:', err);
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       setError(
-        err.response?.data?.error?.message ||
+        error.response?.data?.error?.message ||
           'An error occurred. Please try again.'
       );
     } finally {
@@ -78,12 +79,12 @@ export default function ForgotPasswordPage() {
             Check your email
           </h2>
           <p className="text-gray-600 mb-6">
-            We've sent a password reset link to your email address. Please check
+            We&apos;ve sent a password reset link to your email address. Please check
             your inbox and follow the instructions to reset your password.
           </p>
           <Alert variant="info" className="mb-6">
             <p className="text-sm">
-              If you don't receive an email within a few minutes, please check
+              If you don&apos;t receive an email within a few minutes, please check
               your spam folder or try again.
             </p>
           </Alert>
@@ -102,7 +103,7 @@ export default function ForgotPasswordPage() {
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900">Forgot password?</h2>
         <p className="mt-2 text-gray-600">
-          Enter your email address and we'll send you a link to reset your
+          Enter your email address and we&apos;ll send you a link to reset your
           password.
         </p>
       </div>
@@ -159,7 +160,7 @@ export default function ForgotPasswordPage() {
 
       <div className="mt-8 pt-6 border-t border-gray-200">
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
             href="/register"
             className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
