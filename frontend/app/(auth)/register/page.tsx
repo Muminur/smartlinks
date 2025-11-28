@@ -77,15 +77,15 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="bg-white rounded-lg shadow-xl p-8">
+      <div className="bg-card rounded-lg shadow-xl p-8">
         <Alert variant="success" className="mb-6">
           <div>
-            <h3 className="font-semibold mb-2">Account created successfully!</h3>
-            <p className="text-sm">
+            <h3 className="font-semibold mb-2 text-foreground">Account created successfully!</h3>
+            <p className="text-sm text-muted-foreground">
               We&apos;ve sent a verification email to your inbox. Please verify your
               email address before logging in.
             </p>
-            <p className="text-sm mt-2">
+            <p className="text-sm mt-2 text-muted-foreground">
               Redirecting to login page...
             </p>
           </div>
@@ -95,10 +95,10 @@ function RegisterForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-xl p-8">
+    <div className="bg-card rounded-lg shadow-xl p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
-        <p className="mt-2 text-gray-600">
+        <h2 className="text-3xl font-bold text-foreground">Create an account</h2>
+        <p className="mt-2 text-muted-foreground">
           Start shortening URLs and tracking analytics
         </p>
       </div>
@@ -118,7 +118,7 @@ function RegisterForm() {
           error={errors.name?.message}
           icon={
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-5 w-5 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -141,7 +141,7 @@ function RegisterForm() {
           error={errors.email?.message}
           icon={
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-5 w-5 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -174,11 +174,11 @@ function RegisterForm() {
 
         <div className="flex items-start space-x-2">
           <Checkbox id="agreedToTerms" {...register('agreedToTerms')} className="mt-1" />
-          <Label htmlFor="agreedToTerms" className="text-sm font-medium leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <Label htmlFor="agreedToTerms" className="text-sm font-medium leading-relaxed text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             I agree to the{' '}
             <Link
               href="/terms"
-              className="text-blue-600 hover:text-blue-500 underline"
+              className="text-primary hover:text-primary/80 underline"
               target="_blank"
             >
               Terms of Service
@@ -186,7 +186,7 @@ function RegisterForm() {
             and{' '}
             <Link
               href="/privacy"
-              className="text-blue-600 hover:text-blue-500 underline"
+              className="text-primary hover:text-primary/80 underline"
               target="_blank"
             >
               Privacy Policy
@@ -194,7 +194,7 @@ function RegisterForm() {
           </Label>
         </div>
         {errors.agreedToTerms && (
-          <p className="text-sm text-red-600 mt-1">{errors.agreedToTerms.message}</p>
+          <p className="text-sm text-destructive mt-1">{errors.agreedToTerms.message}</p>
         )}
 
         <Button
@@ -211,10 +211,10 @@ function RegisterForm() {
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="px-2 bg-card text-muted-foreground">
               Or register with
             </span>
           </div>
@@ -270,11 +270,11 @@ function RegisterForm() {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-600">
+      <p className="mt-8 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <Link
           href="/login"
-          className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+          className="font-medium text-primary hover:text-primary/80 transition-colors"
         >
           Sign in
         </Link>
@@ -285,15 +285,15 @@ function RegisterForm() {
 
 function LoadingFallback() {
   return (
-    <div className="bg-white rounded-lg shadow-xl p-8">
+    <div className="bg-card rounded-lg shadow-xl p-8">
       <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+        <div className="h-8 bg-muted rounded w-3/4 mb-4"></div>
+        <div className="h-4 bg-muted rounded w-1/2 mb-8"></div>
         <div className="space-y-4">
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
         </div>
       </div>
     </div>

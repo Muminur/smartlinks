@@ -140,7 +140,7 @@ function LoginContent() {
 
           <Link
             href="/forgot-password"
-            className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
+            className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
           >
             Forgot password?
           </Link>
@@ -163,7 +163,7 @@ function LoginContent() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-background text-muted-foreground">
+            <span className="px-2 bg-card text-muted-foreground">
               Or continue with
             </span>
           </div>
@@ -223,7 +223,7 @@ function LoginContent() {
         Don&apos;t have an account?{' '}
         <Link
           href="/register"
-          className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+          className="font-medium text-primary hover:text-primary/80 transition-colors"
         >
           Sign up for free
         </Link>
