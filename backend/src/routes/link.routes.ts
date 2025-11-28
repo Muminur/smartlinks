@@ -10,6 +10,7 @@ import {
   toggleLinkStatusController,
   getLinkAnalyticsController,
   getQrCodeController,
+  getUrlPreviewController,
 } from '../controllers/link.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { validateRequest, validateQuery, validateParams } from '../middleware/validateRequest';
@@ -115,6 +116,18 @@ router.delete(
   authenticateToken,
   validateParams(linkIdSchema),
   deleteLinkController
+);
+
+/**
+ * @route   POST /api/links/preview
+ * @desc    Get URL preview metadata (title, description, image, favicon)
+ * @access  Private
+ * @body    url - URL to fetch preview for
+ */
+router.post(
+  '/preview',
+  authenticateToken,
+  getUrlPreviewController
 );
 
 /**

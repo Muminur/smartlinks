@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { linkService, CreateLinkData } from '../services/link.service';
+import { urlPreviewService } from '../services/urlPreview.service';
 import { ApiResponse } from '../types';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth.middleware';
@@ -569,6 +570,49 @@ export const getQrCodeController = async (
     logger.info(`QR code retrieved for link ${id} in format ${format}`);
   } catch (error) {
     logger.error('Get QR code controller error:', error);
+    next(error);
+  }
+};
+
+/**
+ * Get URL preview metadata (title, description, image, favicon)
+ * POST /api/links/preview
+ */
+export const getUrlPreviewController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { url } = req.body;
+
+    if (!url || typeof url !== 'string') {
+      throw new ValidationError('URL is required');
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch {
+      throw new ValidationError('Invalid URL format');
+    }
+
+    // Fetch URL preview data
+    const previewData = await urlPreviewService.getUrlPreview(url);
+
+    const response: ApiResponse = {
+      success: true,
+      data: {
+        title: previewData.title,
+        description: previewData.description,
+        image: previewData.image,
+        favicon: previewData.favicon,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    logger.error('Get URL preview controller error:', error);
     next(error);
   }
 };
