@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function OfflinePage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

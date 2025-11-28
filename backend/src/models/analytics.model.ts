@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import crypto from 'crypto';
 
 // Analytics interface - represents an analytics event document in MongoDB
 export interface IAnalytics {
@@ -234,7 +235,7 @@ AnalyticsSchema.statics.getAnalyticsByLink = async function (
   startDate?: Date,
   endDate?: Date
 ): Promise<IAnalyticsDocument[]> {
-  const query: any = { linkId: new Types.ObjectId(linkId) };
+  const query: { linkId: Types.ObjectId; timestamp?: { $gte?: Date; $lte?: Date } } = { linkId: new Types.ObjectId(linkId) };
 
   if (startDate || endDate) {
     query.timestamp = {};
@@ -251,7 +252,7 @@ AnalyticsSchema.statics.getAnalyticsByUser = async function (
   startDate?: Date,
   endDate?: Date
 ): Promise<IAnalyticsDocument[]> {
-  const query: any = { userId: new Types.ObjectId(userId) };
+  const query: { userId: Types.ObjectId; timestamp?: { $gte?: Date; $lte?: Date } } = { userId: new Types.ObjectId(userId) };
 
   if (startDate || endDate) {
     query.timestamp = {};
@@ -268,10 +269,9 @@ AnalyticsSchema.pre('save', async function (next) {
 
   // Hash IP address for privacy (simple hash for demonstration)
   if (analytics.isModified('ip')) {
-    const crypto = require('crypto');
     analytics.ip = crypto
       .createHash('sha256')
-      .update(analytics.ip + process.env.IP_HASH_SECRET || 'default-secret')
+      .update(analytics.ip + (process.env.IP_HASH_SECRET || 'default-secret'))
       .digest('hex')
       .substring(0, 16); // Store only first 16 characters for space efficiency
   }

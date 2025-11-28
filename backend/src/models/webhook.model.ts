@@ -60,7 +60,7 @@ export interface IWebhookDelivery {
 export interface IWebhookDeliveryDocument extends IWebhookDelivery, Document {}
 
 // Webhook delivery model interface
-export interface IWebhookDeliveryModel extends Model<IWebhookDeliveryDocument> {}
+export type IWebhookDeliveryModel = Model<IWebhookDeliveryDocument>;
 
 // Webhook schema
 const WebhookSchema = new Schema<IWebhookDocument, IWebhookModel>(

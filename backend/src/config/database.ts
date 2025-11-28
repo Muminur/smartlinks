@@ -23,7 +23,7 @@ export const connectDB = async (): Promise<void> => {
 
     // Attempt connection with retry logic
     let retries = 5;
-    let lastError: any;
+    let lastError: unknown;
 
     while (retries > 0) {
       try {

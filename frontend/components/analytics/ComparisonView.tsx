@@ -96,7 +96,7 @@ export default function ComparisonView({ dateRange }: ComparisonViewProps) {
                   <SelectValue placeholder="Select first link" />
                 </SelectTrigger>
                 <SelectContent>
-                  {links.map((link: any) => (
+                  {links.map((link: { _id: string; slug: string; originalUrl: string }) => (
                     <SelectItem key={link._id} value={link._id} disabled={link._id === link2Id}>
                       {link.slug} - {link.originalUrl.substring(0, 40)}...
                     </SelectItem>
@@ -122,7 +122,7 @@ export default function ComparisonView({ dateRange }: ComparisonViewProps) {
                   <SelectValue placeholder="Select second link" />
                 </SelectTrigger>
                 <SelectContent>
-                  {links.map((link: any) => (
+                  {links.map((link: { _id: string; slug: string; originalUrl: string }) => (
                     <SelectItem key={link._id} value={link._id} disabled={link._id === link1Id}>
                       {link.slug} - {link.originalUrl.substring(0, 40)}...
                     </SelectItem>

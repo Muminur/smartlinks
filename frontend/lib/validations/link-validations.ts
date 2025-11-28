@@ -42,8 +42,7 @@ export const createLinkSchema = z.object({
   tags: z
     .array(z.string())
     .max(10, 'Maximum 10 tags allowed')
-    .optional()
-    .default([]),
+    .optional(),
   expiresAt: z
     .string()
     .datetime({ message: 'Invalid date format' })
@@ -65,7 +64,7 @@ export const createLinkSchema = z.object({
     .max(50, 'Password must be less than 50 characters')
     .optional()
     .or(z.literal('')),
-  generateQR: z.boolean().optional().default(false),
+  generateQR: z.boolean().optional(),
 });
 
 export type CreateLinkFormData = z.infer<typeof createLinkSchema>;

@@ -46,9 +46,7 @@ export interface IUserDocument extends IUser, Document {
 }
 
 // User model interface with static methods
-export interface IUserModel extends Model<IUserDocument> {
-  // Add static methods here if needed in the future
-}
+export type IUserModel = Model<IUserDocument>;
 
 // User schema definition
 const UserSchema = new Schema<IUserDocument, IUserModel>(
@@ -203,8 +201,8 @@ UserSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (err) {
+    next(err as Error);
   }
 });
 
@@ -215,7 +213,7 @@ UserSchema.methods.comparePassword = async function (
   try {
     const user = this as IUserDocument;
     return await bcrypt.compare(candidatePassword, user.password);
-  } catch (error) {
+  } catch {
     return false;
   }
 };

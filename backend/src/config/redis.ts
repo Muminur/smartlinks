@@ -105,7 +105,7 @@ export const connectRedis = async (): Promise<RedisClientType | null> => {
 
     // Attempt connection with limited retries
     let retries = 2; // Reduced from 5 for faster failure
-    let lastError: any;
+    let lastError: unknown;
 
     while (retries > 0) {
       try {
@@ -127,11 +127,12 @@ export const connectRedis = async (): Promise<RedisClientType | null> => {
 
     // If we get here, all retries failed
     throw lastError;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     logger.warn('Redis Connection Failed');
     logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    logger.warn(`Reason: ${error.message || 'Unknown error'}`);
+    logger.warn(`Reason: ${errorMessage}`);
     logger.warn('');
     logger.warn('Application will continue WITHOUT caching:');
     logger.warn('  • Link redirects will query MongoDB directly');

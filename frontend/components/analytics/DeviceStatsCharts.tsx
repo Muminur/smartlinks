@@ -38,13 +38,13 @@ function DeviceChart({ data, isLoading }: { data?: DeviceData[]; isLoading: bool
             border: '1px solid hsl(var(--border))',
             borderRadius: '8px',
           }}
-          formatter={(value: number, _name: string) => [
+          formatter={(value: number) => [
             `${value.toLocaleString()} (${data.find(d => d.clicks === value)?.percentage.toFixed(1)}%)`,
             'Clicks',
           ]}
         />
         <Bar dataKey="clicks" radius={[8, 8, 0, 0]}>
-          {data.map((_entry, index) => (
+          {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={CHART_COLORS_ARRAY[index % CHART_COLORS_ARRAY.length]} />
           ))}
         </Bar>
@@ -78,13 +78,13 @@ function BrowserChart({ data, isLoading }: { data?: BrowserData[]; isLoading: bo
             border: '1px solid hsl(var(--border))',
             borderRadius: '8px',
           }}
-          formatter={(value: number, _name: string) => [
+          formatter={(value: number) => [
             `${value.toLocaleString()} (${data.find(d => d.clicks === value)?.percentage.toFixed(1)}%)`,
             'Clicks',
           ]}
         />
         <Bar dataKey="clicks" radius={[8, 8, 0, 0]}>
-          {data.map((_entry, index) => (
+          {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={CHART_COLORS_ARRAY[index % CHART_COLORS_ARRAY.length]} />
           ))}
         </Bar>
@@ -118,13 +118,13 @@ function OSChart({ data, isLoading }: { data?: OSData[]; isLoading: boolean }) {
             border: '1px solid hsl(var(--border))',
             borderRadius: '8px',
           }}
-          formatter={(value: number, _name: string) => [
+          formatter={(value: number) => [
             `${value.toLocaleString()} (${data.find(d => d.clicks === value)?.percentage.toFixed(1)}%)`,
             'Clicks',
           ]}
         />
         <Bar dataKey="clicks" radius={[8, 8, 0, 0]}>
-          {data.map((_entry, index) => (
+          {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={CHART_COLORS_ARRAY[index % CHART_COLORS_ARRAY.length]} />
           ))}
         </Bar>

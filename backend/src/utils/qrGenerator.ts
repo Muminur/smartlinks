@@ -44,9 +44,10 @@ export const generateQRCode = async (
     logger.debug(`QR code generated for URL: ${url} (${qrCodeDataURL.length} bytes)`);
 
     return qrCodeDataURL;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('QR code generation error:', error);
-    throw new Error(`Failed to generate QR code: ${error.message}`);
+    throw new Error(`Failed to generate QR code: ${errorMessage}`);
   }
 };
 
@@ -69,9 +70,10 @@ export const generateQRCodeSVG = async (url: string): Promise<string> => {
     });
 
     return svg;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('QR code SVG generation error:', error);
-    throw new Error(`Failed to generate QR code SVG: ${error.message}`);
+    throw new Error(`Failed to generate QR code SVG: ${errorMessage}`);
   }
 };
 
@@ -94,9 +96,10 @@ export const generateQRCodeBuffer = async (url: string): Promise<Buffer> => {
     });
 
     return buffer;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('QR code buffer generation error:', error);
-    throw new Error(`Failed to generate QR code buffer: ${error.message}`);
+    throw new Error(`Failed to generate QR code buffer: ${errorMessage}`);
   }
 };
 

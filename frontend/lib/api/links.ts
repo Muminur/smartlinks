@@ -109,7 +109,12 @@ export async function checkSlugAvailability(
  * Waits 500ms after the last call before making the API request
  */
 export const checkSlugAvailabilityDebounced = debounceAsync(
-  checkSlugAvailability,
+  (slug: unknown) => {
+    if (typeof slug !== 'string') {
+      return Promise.reject(new Error('Invalid slug'));
+    }
+    return checkSlugAvailability(slug);
+  },
   500
 );
 

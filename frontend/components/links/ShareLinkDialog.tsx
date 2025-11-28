@@ -5,7 +5,6 @@ import {
   Copy,
   Check,
   Mail,
-  Share2,
   Facebook,
   Twitter,
   Linkedin,

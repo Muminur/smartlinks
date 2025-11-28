@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import crypto from 'crypto';
 
 // Domain interface - represents a custom domain document in MongoDB
 export interface IDomain {
@@ -163,7 +164,6 @@ DomainSchema.pre('save', function (next) {
 
 // Method to generate verification token
 DomainSchema.methods.generateVerificationToken = function (): string {
-  const crypto = require('crypto');
   return crypto.randomBytes(32).toString('hex');
 };
 

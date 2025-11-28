@@ -56,11 +56,12 @@ export function FilterToolbar({
   });
 
   // Debounced search handler
-  const debouncedSearch = React.useMemo(
-    () =>
-      (debounce as any)((value: string) => {
+  const debouncedSearch = React.useCallback(
+    debounce((value) => {
+      if (typeof value === 'string') {
         onFiltersChange({ search: value });
-      }, 500),
+      }
+    }, 500),
     [onFiltersChange]
   );
 
@@ -159,7 +160,7 @@ export function FilterToolbar({
         <div className="flex items-center gap-2">
           <Select
             value={filters.sortBy || 'createdAt'}
-            onValueChange={(value: any) => onFiltersChange({ sortBy: value })}
+            onValueChange={(value) => onFiltersChange({ sortBy: value as LinkFilters['sortBy'] })}
           >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Sort by" />
@@ -200,7 +201,7 @@ export function FilterToolbar({
               <label className="text-sm font-medium">Status</label>
               <Select
                 value={filters.status || 'all'}
-                onValueChange={(value: any) => onFiltersChange({ status: value })}
+                onValueChange={(value) => onFiltersChange({ status: value as LinkFilters['status'] })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -244,7 +245,7 @@ export function FilterToolbar({
                 <PopoverContent className="w-auto p-0" align="start">
                   <DayPicker
                     mode="range"
-                    selected={dateRange as any}
+                    selected={dateRange.from && dateRange.to ? dateRange as { from: Date; to: Date } : undefined}
                     onSelect={handleDateRangeSelect}
                     numberOfMonths={2}
                   />

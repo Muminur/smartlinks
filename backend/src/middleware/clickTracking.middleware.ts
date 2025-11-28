@@ -33,7 +33,7 @@ export const trackClick = async (
     const ip = getClientIp(req);
 
     // Check if request is from a bot (skip analytics for bots if configured)
-    const skipAnalytics = (req as any).skipAnalytics || false;
+    const skipAnalytics = (req as unknown as Record<string, unknown>).skipAnalytics || false;
 
     if (skipAnalytics) {
       logger.debug(`Skipping analytics for bot: ${slug}`);
@@ -230,7 +230,7 @@ export const getUniqueVisitorCount = async (slug: string): Promise<number> => {
  * @param slug - Link slug
  * @param clickData - Click event data
  */
-export const emitClickEvent = (slug: string, clickData: any): void => {
+export const emitClickEvent = (slug: string, clickData: Record<string, unknown>): void => {
   // This can be extended to use Socket.io or other event emitters
   // For now, just log for debugging
   logger.debug(`Click event emitted for ${slug}:`, {
@@ -269,8 +269,8 @@ export const isLegitimateClick = async (req: Request, slug: string): Promise<boo
     }
 
     // Check 2: Bot detection
-    const isBot = (req as any).isBot || false;
-    if (isBot && !(req as any).isTrustedBot) {
+    const isBot = (req as unknown as Record<string, unknown>).isBot || false;
+    if (isBot && !(req as unknown as Record<string, unknown>).isTrustedBot) {
       logger.debug(`Untrusted bot detected: ${slug}`);
       return false; // Don't count untrusted bots
     }

@@ -123,9 +123,9 @@ export const detectBot = (req: Request, _res: Response, next: NextFunction): voi
   const userAgent = req.headers['user-agent'] || '';
 
   // Attach bot detection result to request
-  (req as any).isBot = isBot(userAgent);
+  (req as unknown as Record<string, unknown>).isBot = isBot(userAgent);
 
-  if ((req as any).isBot) {
+  if ((req as unknown as Record<string, unknown>).isBot) {
     logger.debug(`Bot detected: ${userAgent.substring(0, 100)}`);
   }
 
@@ -137,11 +137,11 @@ export const detectBot = (req: Request, _res: Response, next: NextFunction): voi
  * For bots, we can serve optimized responses or skip certain operations
  */
 export const handleBot = (req: Request, _res: Response, next: NextFunction): void => {
-  const isRequestFromBot = (req as any).isBot;
+  const isRequestFromBot = (req as unknown as Record<string, unknown>).isBot;
 
   if (isRequestFromBot) {
     // For bots, we might want to skip analytics tracking
-    (req as any).skipAnalytics = true;
+    (req as unknown as Record<string, unknown>).skipAnalytics = true;
 
     logger.debug(`Handling bot request: ${req.path}`);
   }

@@ -396,7 +396,7 @@ class LinkService {
       const limitNum = Math.min(Math.max(1, limit), 100);
       const skip = (pageNum - 1) * limitNum;
 
-      const query: any = { userId: new Types.ObjectId(userId) };
+      const query: Record<string, unknown> = { userId: new Types.ObjectId(userId) };
 
       if (isActive !== undefined) {
         query.isActive = isActive;
@@ -420,7 +420,7 @@ class LinkService {
       }
 
       const sortOrder = order === 'asc' ? 1 : -1;
-      const sortObj: any = { [sortBy]: sortOrder };
+      const sortObj: { [key: string]: 1 | -1 } = { [sortBy]: sortOrder };
 
       const [links, totalItems] = await Promise.all([
         Link.find(query)
@@ -703,22 +703,22 @@ class LinkService {
         throw new ForbiddenError('You do not have permission to view analytics for this link');
       }
 
-      const dateQuery: any = { linkId: new Types.ObjectId(linkId) };
+      const dateQuery: Record<string, unknown> = { linkId: new Types.ObjectId(linkId) };
 
       if (startDate || endDate) {
         dateQuery.timestamp = {};
-        if (startDate) dateQuery.timestamp.$gte = startDate;
-        if (endDate) dateQuery.timestamp.$lte = endDate;
+        if (startDate) (dateQuery.timestamp as Record<string, unknown>).$gte = startDate;
+        if (endDate) (dateQuery.timestamp as Record<string, unknown>).$lte = endDate;
       }
 
       const analyticsData = await Analytics.find(dateQuery).lean();
 
       const totalClicks = analyticsData.length;
 
-      const uniqueVisitors = new Set(analyticsData.map((a: any) => a.ip)).size;
+      const uniqueVisitors = new Set(analyticsData.map((a) => a.ip)).size;
 
       const countryCounts: Record<string, number> = {};
-      analyticsData.forEach((a: any) => {
+      analyticsData.forEach((a) => {
         const country = a.location?.country || 'Unknown';
         countryCounts[country] = (countryCounts[country] || 0) + 1;
       });
@@ -728,7 +728,7 @@ class LinkService {
         .slice(0, 10);
 
       const deviceCounts: Record<string, number> = {};
-      analyticsData.forEach((a: any) => {
+      analyticsData.forEach((a) => {
         const device = a.device?.type || 'unknown';
         deviceCounts[device] = (deviceCounts[device] || 0) + 1;
       });
@@ -738,7 +738,7 @@ class LinkService {
         .slice(0, 5);
 
       const browserCounts: Record<string, number> = {};
-      analyticsData.forEach((a: any) => {
+      analyticsData.forEach((a) => {
         const browser = a.browser?.name || 'Unknown';
         browserCounts[browser] = (browserCounts[browser] || 0) + 1;
       });
@@ -748,7 +748,7 @@ class LinkService {
         .slice(0, 10);
 
       const referrerCounts: Record<string, number> = {};
-      analyticsData.forEach((a: any) => {
+      analyticsData.forEach((a) => {
         const referrer = a.referrer?.domain || 'Direct';
         referrerCounts[referrer] = (referrerCounts[referrer] || 0) + 1;
       });
@@ -758,7 +758,7 @@ class LinkService {
         .slice(0, 10);
 
       const clicksByDateMap: Record<string, number> = {};
-      analyticsData.forEach((a: any) => {
+      analyticsData.forEach((a) => {
         const date = new Date(a.timestamp).toISOString().split('T')[0];
         clicksByDateMap[date] = (clicksByDateMap[date] || 0) + 1;
       });

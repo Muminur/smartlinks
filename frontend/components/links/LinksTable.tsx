@@ -42,7 +42,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { formatNumber, formatRelativeTime, truncate, copyToClipboard } from '@/lib/utils';
-import type { Link, LinkFilters } from '@/types';
+import type { Link } from '@/types';
 import { toast } from 'sonner';
 
 interface LinksTableProps {
@@ -169,7 +169,6 @@ export function LinksTable({
   }
 
   const allSelected = links.length > 0 && selectedIds.length === links.length;
-  const someSelected = selectedIds.length > 0 && selectedIds.length < links.length;
 
   return (
     <div className="rounded-lg border">

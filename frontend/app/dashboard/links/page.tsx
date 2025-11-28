@@ -72,7 +72,7 @@ export default function LinksPage() {
   const handleSort = (field: string) => {
     const newSortOrder =
       filters.sortBy === field && filters.sortOrder === 'desc' ? 'asc' : 'desc';
-    setFilters({ sortBy: field as any, sortOrder: newSortOrder });
+    setFilters({ sortBy: field as LinkFilters['sortBy'], sortOrder: newSortOrder });
   };
 
   const handleEdit = (link: Link) => {

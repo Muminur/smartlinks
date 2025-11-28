@@ -13,7 +13,7 @@ import {
   Trash2,
   ExternalLink,
 } from 'lucide-react';
-import { useNotificationStore, type NotificationType } from '@/stores/notification-store';
+import { useNotificationStore, type NotificationType, type Notification } from '@/stores/notification-store';
 import {
   Popover,
   PopoverContent,
@@ -121,7 +121,7 @@ export function NotificationCenter() {
             <Bell className="mb-2 h-12 w-12 text-muted-foreground/50" />
             <p className="text-sm font-medium">No notifications</p>
             <p className="text-xs text-muted-foreground">
-              You're all caught up!
+              You&apos;re all caught up!
             </p>
           </div>
         ) : (
@@ -184,7 +184,7 @@ function NotificationItem({
   onMarkAsRead,
   onRemove,
 }: {
-  notification: any;
+  notification: Notification;
   onMarkAsRead: (id: string) => void;
   onRemove: (id: string) => void;
 }) {

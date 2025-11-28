@@ -42,9 +42,7 @@ export interface ILinkDocument extends ILink, Document {
 }
 
 // Link model interface with static methods
-export interface ILinkModel extends Model<ILinkDocument> {
-  // Add static methods here if needed in the future
-}
+export type ILinkModel = Model<ILinkDocument>;
 
 // Link schema definition
 const LinkSchema = new Schema<ILinkDocument, ILinkModel>(
@@ -214,8 +212,8 @@ LinkSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     link.password = await bcrypt.hash(link.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
+  } catch (error: unknown) {
+    next(error instanceof Error ? error : new Error('Password hashing failed'));
   }
 });
 
@@ -263,7 +261,7 @@ LinkSchema.methods.comparePassword = async function (
     }
 
     return await bcrypt.compare(candidatePassword, link.password);
-  } catch (error) {
+  } catch {
     return false;
   }
 };

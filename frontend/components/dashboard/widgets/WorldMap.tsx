@@ -146,7 +146,7 @@ export function WorldMap({ data, isLoading = false, className }: WorldMapProps) 
     return '#22c55e'; // green
   };
 
-  const handleMouseMove = (e: React.MouseEvent, country: CountryData) => {
+  const handleMouseMove = (e: React.MouseEvent, _country: CountryData) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setTooltipPosition({

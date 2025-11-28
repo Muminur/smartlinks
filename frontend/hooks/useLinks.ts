@@ -110,8 +110,9 @@ export function useCreateLink() {
 
       toast.success('Link created successfully!');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to create link');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to create link');
     },
   });
 }
@@ -134,8 +135,9 @@ export function useUpdateLink() {
 
       toast.success('Link updated successfully!');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to update link');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to update link');
     },
   });
 }
@@ -157,8 +159,9 @@ export function useDeleteLink() {
 
       toast.success('Link deleted successfully!');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to delete link');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to delete link');
     },
   });
 }
@@ -182,8 +185,9 @@ export function useBulkDeleteLinks() {
 
       toast.success(`${deletedIds.length} link(s) deleted successfully!`);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to delete links');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to delete links');
     },
   });
 }
@@ -208,8 +212,9 @@ export function useToggleLinkStatus() {
         `Link ${updatedLink.isActive ? 'activated' : 'deactivated'} successfully!`
       );
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to update link status');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to update link status');
     },
   });
 }
@@ -229,8 +234,9 @@ export function useCheckSlugAvailability() {
 export function useGetLinkPreview() {
   return useMutation({
     mutationFn: (url: string) => linksApi.getLinkPreview(url),
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to fetch link preview');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to fetch link preview');
     },
   });
 }
@@ -252,8 +258,9 @@ export function useGenerateQRCode() {
 
       toast.success('QR code generated successfully!');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to generate QR code');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to generate QR code');
     },
   });
 }
@@ -287,8 +294,9 @@ export function useExportLinks() {
 
       toast.success('Links exported successfully!');
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to export links');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to export links');
     },
   });
 }
@@ -319,8 +327,9 @@ export function useImportLinks() {
         toast.success(`Successfully imported ${result.imported} link(s)!`);
       }
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to import links');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to import links');
     },
   });
 }
@@ -334,15 +343,16 @@ export function useBulkAddTags() {
   return useMutation({
     mutationFn: ({ linkIds, tags }: { linkIds: string[]; tags: string[] }) =>
       linksApi.bulkAddTags(linkIds, tags),
-    onSuccess: (_, { linkIds, tags }) => {
+    onSuccess: (_, { linkIds }) => {
       // Invalidate lists and tags
       queryClient.invalidateQueries({ queryKey: linksKeys.lists() });
       queryClient.invalidateQueries({ queryKey: linksKeys.tags() });
 
       toast.success(`Tags added to ${linkIds.length} link(s)!`);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.error?.message || 'Failed to add tags');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message || 'Failed to add tags');
     },
   });
 }

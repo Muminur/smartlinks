@@ -111,7 +111,7 @@ export default function TrafficSourcesChart({ linkId, dateRange }: TrafficSource
     trafficSources.sort((a, b) => b.value - a.value);
   }
 
-  const onPieEnter = (_: any, index: number) => {
+  const onPieEnter = (_: unknown, index: number) => {
     setActiveIndex(index);
   };
 
@@ -151,7 +151,10 @@ export default function TrafficSourcesChart({ linkId, dateRange }: TrafficSource
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(props: any) => `${props.percentage.toFixed(1)}%`}
+                  label={(props) => {
+                    const entry = trafficSources[props.index];
+                    return entry ? `${entry.percentage.toFixed(1)}%` : '';
+                  }}
                   outerRadius={100}
                   innerRadius={60}
                   fill="#8884d8"

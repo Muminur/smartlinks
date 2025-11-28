@@ -4,7 +4,7 @@ import React from 'react';
 import { ExternalLink, Copy, Check, Eye, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge, Button } from '@/components/ui';
-import { formatNumber, formatRelativeTime, copyToClipboard } from '@/lib/utils';
+import { formatNumber, formatRelativeTime } from '@/lib/utils';
 import type { Link } from '@/types';
 import { toast } from 'sonner';
 
@@ -26,11 +26,13 @@ export function LinkPreview({
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = async () => {
-    const success = await copyToClipboard(shortUrl);
-    if (success) {
+    try {
+      await navigator.clipboard.writeText(shortUrl);
       setCopied(true);
       toast.success('Link copied!');
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy link');
     }
   };
 

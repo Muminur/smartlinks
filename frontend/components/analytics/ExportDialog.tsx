@@ -118,7 +118,7 @@ export default function ExportDialog({ open, onClose, linkId, dateRange }: Expor
       }
 
       onClose();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Export failed',
         description: 'Failed to export analytics. Please try again.',
@@ -144,7 +144,7 @@ export default function ExportDialog({ open, onClose, linkId, dateRange }: Expor
           {/* Export Format */}
           <div className="space-y-3">
             <Label>Export Format</Label>
-            <RadioGroup value={format} onValueChange={(value: any) => setFormat(value)}>
+            <RadioGroup value={format} onValueChange={(value: 'csv' | 'json' | 'pdf') => setFormat(value)}>
               {EXPORT_FORMATS.map((fmt) => (
                 <div key={fmt.value} className="flex items-center space-x-2">
                   <RadioGroupItem value={fmt.value} id={fmt.value} />

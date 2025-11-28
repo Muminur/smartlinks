@@ -90,7 +90,7 @@ router.get(
   handleBot, // Handle bot-specific logic
   async (req, res) => {
     // Special handling for trusted bots (search engines, social media)
-    const isBot = (req as any).isBot;
+    const isBot = (req as unknown as Record<string, unknown>).isBot;
     const userAgent = req.headers['user-agent'] || '';
 
     if (isBot && isTrustedBot(userAgent)) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/auth-store';
@@ -19,33 +19,36 @@ export function SessionExpiredModal({
   const { logout } = useAuthStore();
   const [countdown, setCountdown] = useState(60);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setCountdown(60);
-      return;
-    }
-
-    // Countdown timer
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          handleLogout();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isOpen]);
-
-  const handleLogout = () => {
+  const handleLogout = React.useCallback(() => {
     logout();
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     onClose();
     router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-  };
+  }, [logout, onClose, router, pathname]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Use setTimeout to defer the countdown reset
+    const resetTimer = setTimeout(() => setCountdown(60), 0);
+
+    let currentCount = 60;
+    const timer = setInterval(() => {
+      currentCount -= 1;
+
+      if (currentCount <= 0) {
+        handleLogout();
+      } else {
+        setCountdown(currentCount);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(resetTimer);
+      clearInterval(timer);
+    };
+  }, [isOpen, handleLogout]);
 
   const handleStayLoggedIn = () => {
     onClose();
@@ -92,7 +95,7 @@ export function SessionExpiredModal({
               Your session is about to expire
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              For your security, you'll be automatically logged out in{' '}
+              For your security, you&apos;ll be automatically logged out in{' '}
               <span className="font-semibold text-blue-600">{countdown}</span>{' '}
               seconds due to inactivity.
             </p>
@@ -136,14 +139,14 @@ export function SessionExpiredModal({
  */
 export function useSessionTimeout(timeoutMinutes: number = 30) {
   const [showModal, setShowModal] = useState(false);
-  const [lastActivity, setLastActivity] = useState(Date.now());
+  const lastActivityRef = React.useRef(() => Date.now());
 
   useEffect(() => {
     // Track user activity
     const activities = ['mousedown', 'keydown', 'scroll', 'touchstart'];
 
     const handleActivity = () => {
-      setLastActivity(Date.now());
+      lastActivityRef.current = () => Date.now();
       setShowModal(false);
     };
 
@@ -153,7 +156,7 @@ export function useSessionTimeout(timeoutMinutes: number = 30) {
 
     // Check for inactivity
     const checkInterval = setInterval(() => {
-      const inactiveTime = Date.now() - lastActivity;
+      const inactiveTime = Date.now() - lastActivityRef.current();
       const warningTime = (timeoutMinutes - 1) * 60 * 1000; // 1 minute before timeout
 
       if (inactiveTime >= warningTime) {
@@ -167,7 +170,7 @@ export function useSessionTimeout(timeoutMinutes: number = 30) {
       });
       clearInterval(checkInterval);
     };
-  }, [lastActivity, timeoutMinutes]);
+  }, [timeoutMinutes]);
 
   return {
     showModal,

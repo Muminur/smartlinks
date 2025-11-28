@@ -51,7 +51,7 @@ class EmailService {
     return this.emailEnabled && this.transporter !== null;
   }
 
-  private logEmailToConsole(mailOptions: any): void {
+  private logEmailToConsole(mailOptions: { from: string; to: string; subject: string; text: string }): void {
     logger.info('='.repeat(80));
     logger.info('EMAIL MOCK MODE - Email not sent (ENABLE_EMAIL is disabled)');
     logger.info('='.repeat(80));

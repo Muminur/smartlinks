@@ -147,7 +147,7 @@ export const optionalAuth = async (
             email: decoded.email,
             role: decoded.role,
           };
-        } catch (error) {
+        } catch {
           // Invalid token, but continue without authentication
           logger.debug('Optional auth failed, continuing without user');
         }
@@ -155,7 +155,7 @@ export const optionalAuth = async (
     }
 
     next();
-  } catch (error) {
+  } catch {
     // If anything goes wrong, just continue without authentication
     next();
   }

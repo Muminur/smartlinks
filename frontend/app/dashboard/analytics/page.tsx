@@ -20,6 +20,7 @@ import RealtimePanel from '@/components/analytics/RealtimePanel';
 import PerformanceMetrics from '@/components/analytics/PerformanceMetrics';
 import TrafficSourcesChart from '@/components/analytics/TrafficSourcesChart';
 import type { DateRange } from '@/types/analytics';
+import type { Link } from '@/types';
 import { subDays } from 'date-fns';
 import { getLinks } from '@/lib/api/links';
 
@@ -74,7 +75,7 @@ export default function AnalyticsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Links</SelectItem>
-              {links?.data?.map((link: any) => (
+              {links?.data?.map((link: Link) => (
                 <SelectItem key={link._id} value={link._id}>
                   {link.slug} - {link.originalUrl.substring(0, 50)}...
                 </SelectItem>

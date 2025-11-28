@@ -51,18 +51,7 @@ export function Header() {
       .slice(0, 2);
   };
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return Sun;
-      case 'dark':
-        return Moon;
-      default:
-        return Monitor;
-    }
-  };
-
-  const ThemeIcon = getThemeIcon();
+  const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

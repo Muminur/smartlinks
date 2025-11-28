@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Link as LinkType, LinkFilters } from '@/types';
+import type { LinkFilters } from '@/types';
 
 export interface Link {
   _id: string;

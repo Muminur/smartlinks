@@ -70,7 +70,7 @@ export function EditLinkModal({
   const onSubmit = async (data: UpdateLinkFormData) => {
     // Remove empty fields
     const cleanData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== '' && v !== undefined)
+      Object.entries(data).filter(([, v]) => v !== '' && v !== undefined)
     );
 
     updateMutation.mutate(

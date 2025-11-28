@@ -37,7 +37,7 @@ export async function extractUrlMetadata(url: string): Promise<UrlMetadata> {
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(url);
-    } catch (error) {
+    } catch {
       logger.warn(`Invalid URL for metadata extraction: ${url}`);
       return {};
     }

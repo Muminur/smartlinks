@@ -57,7 +57,7 @@ export function formatAnalyticsForExport(
     return {
       timestamp: record.timestamp.toISOString(),
       linkId: record.linkId.toString(),
-      slug: (record as any).slug || undefined,
+      slug: ('slug' in record && typeof record.slug === 'string') ? record.slug : undefined,
       // Location
       country: record.location?.country || undefined,
       countryCode: record.location?.countryCode || undefined,
@@ -204,8 +204,10 @@ export function exportAnalyticsToJSON(
  * @param res - Express response object
  * @param filename - Filename for the download
  */
+import { Query } from 'mongoose';
+
 export async function streamCSVExport(
-  query: any,
+  query: Query<unknown, unknown>,
   res: Response,
   filename: string
 ): Promise<void> {
@@ -283,7 +285,7 @@ export async function streamCSVExport(
         // Parse batch to CSV (without header)
         for (const row of formattedBatch) {
           const csvRow = fields.map((field) => {
-            const value = (row as any)[field.value];
+            const value = (row as unknown as Record<string, unknown>)[field.value];
             if (value === undefined || value === null) return '';
             // Escape quotes and commas
             if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
@@ -307,7 +309,7 @@ export async function streamCSVExport(
 
         for (const row of formattedBatch) {
           const csvRow = fields.map((field) => {
-            const value = (row as any)[field.value];
+            const value = (row as unknown as Record<string, unknown>)[field.value];
             if (value === undefined || value === null) return '';
             if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
               return `"${value.replace(/"/g, '""')}"`;

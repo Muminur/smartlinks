@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertCircle, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
-import { cn } from '@/lib/utils';
 
 interface RateLimitEvent {
   endpoint: string;

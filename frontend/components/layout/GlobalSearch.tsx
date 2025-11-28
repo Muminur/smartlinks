@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -128,7 +128,7 @@ export function GlobalSearch() {
   const { isCommandPaletteOpen, setCommandPaletteOpen } = useUIStore();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [, setRecentSearches] = useState<string[]>([]);
 
   // Combine all searchable items
   const allItems = useMemo(() => {
@@ -165,6 +165,19 @@ export function GlobalSearch() {
     return groups;
   }, [filteredResults]);
 
+  const handleSelect = React.useCallback((result: SearchResult) => {
+    // Add to recent searches
+    setRecentSearches((prev) => {
+      const updated = [result.title, ...prev.filter((s) => s !== result.title)].slice(0, 5);
+      localStorage.setItem('recent-searches', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Navigate
+    router.push(result.url);
+    setCommandPaletteOpen(false);
+  }, [router, setCommandPaletteOpen]);
+
   // Handle keyboard navigation
   useEffect(() => {
     if (!isCommandPaletteOpen) return;
@@ -187,39 +200,31 @@ export function GlobalSearch() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen, selectedIndex, filteredResults]);
+  }, [isCommandPaletteOpen, selectedIndex, filteredResults, handleSelect]);
 
-  // Reset on open/close
+  // Reset on close
   useEffect(() => {
     if (!isCommandPaletteOpen) {
-      setQuery('');
-      setSelectedIndex(0);
+      // Use requestAnimationFrame to defer state updates after render
+      requestAnimationFrame(() => {
+        setQuery('');
+        setSelectedIndex(0);
+      });
     }
   }, [isCommandPaletteOpen]);
 
-  const handleSelect = (result: SearchResult) => {
-    // Add to recent searches
-    setRecentSearches((prev) => {
-      const updated = [result.title, ...prev.filter((s) => s !== result.title)].slice(0, 5);
-      localStorage.setItem('recent-searches', JSON.stringify(updated));
-      return updated;
-    });
-
-    // Navigate
-    router.push(result.url);
-    setCommandPaletteOpen(false);
-  };
-
-  // Load recent searches
+  // Load recent searches on mount
   useEffect(() => {
-    const stored = localStorage.getItem('recent-searches');
-    if (stored) {
-      try {
-        setRecentSearches(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse recent searches', e);
+    requestAnimationFrame(() => {
+      const stored = localStorage.getItem('recent-searches');
+      if (stored) {
+        try {
+          setRecentSearches(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse recent searches', e);
+        }
       }
-    }
+    });
   }, []);
 
   return (
@@ -265,7 +270,7 @@ export function GlobalSearch() {
                     {category}
                   </div>
                   <div className="space-y-1">
-                    {results.map((result, index) => {
+                    {results.map((result) => {
                       const globalIndex = filteredResults.indexOf(result);
                       const isSelected = globalIndex === selectedIndex;
                       const Icon = result.icon;

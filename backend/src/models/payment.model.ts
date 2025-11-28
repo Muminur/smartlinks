@@ -32,7 +32,7 @@ export interface IPayment {
   metadata?: {
     ipAddress?: string;
     userAgent?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   notes?: string;
   createdAt?: Date;
@@ -294,7 +294,7 @@ PaymentSchema.statics.getTotalRevenue = async function (
   startDate?: Date,
   endDate?: Date
 ): Promise<number> {
-  const query: any = { status: 'completed' };
+  const query: { status: string; createdAt?: { $gte?: Date; $lte?: Date } } = { status: 'completed' };
 
   if (startDate || endDate) {
     query.createdAt = {};
@@ -321,7 +321,7 @@ PaymentSchema.statics.getRevenueByPlan = async function (
   startDate?: Date,
   endDate?: Date
 ): Promise<number> {
-  const query: any = {
+  const query: { planId: Types.ObjectId; status: string; createdAt?: { $gte?: Date; $lte?: Date } } = {
     planId: new Types.ObjectId(planId),
     status: 'completed',
   };

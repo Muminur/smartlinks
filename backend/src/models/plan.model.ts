@@ -226,7 +226,7 @@ PlanSchema.methods.isPremium = function (): boolean {
 // Method to check if plan has a specific feature
 PlanSchema.methods.hasFeature = function (feature: string): boolean {
   const plan = this as IPlanDocument;
-  return (plan.features as any)[feature] === true;
+  return (plan.features as Record<string, unknown>)[feature] === true;
 };
 
 // Static method to get the free plan

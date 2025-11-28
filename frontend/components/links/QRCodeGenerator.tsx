@@ -18,8 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui';
-import { cn } from '@/lib/utils';
-import { copyToClipboard } from '@/lib/utils';
 
 interface QRCodeGeneratorProps {
   open: boolean;
@@ -38,7 +36,7 @@ export function QRCodeGenerator({
   const [fgColor, setFgColor] = React.useState('#000000');
   const [bgColor, setBgColor] = React.useState('#ffffff');
   const [copied, setCopied] = React.useState(false);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
   const handleDownload = (format: 'png' | 'svg') => {
     if (!canvasRef.current) return;
@@ -97,7 +95,7 @@ export function QRCodeGenerator({
               bgColor={bgColor}
               level="H"
               includeMargin
-              ref={canvasRef as any}
+              ref={canvasRef}
             />
           </div>
 

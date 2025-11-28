@@ -4,6 +4,27 @@ import { logger } from '../utils/logger';
 import { CacheService } from '../services/cache.service';
 import { trackClick, isLegitimateClick, trackUniqueVisitor } from '../middleware/clickTracking.middleware';
 
+// Link data interface for cached/fetched links
+interface LinkData {
+  _id?: string;
+  userId?: string;
+  slug: string;
+  originalUrl: string;
+  shortUrl?: string;
+  title?: string;
+  description?: string;
+  isActive: boolean;
+  expiresAt?: Date | string;
+  maxClicks?: number;
+  clicks: number;
+  password?: string;
+  metadata?: {
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+  };
+}
+
 /**
  * Redirect Controller - High-performance link redirect handler
  * Target: Sub-100ms redirect latency with Redis caching
@@ -34,7 +55,7 @@ export const redirectController = async (req: Request, res: Response): Promise<v
     }
 
     // Step 1: Check Redis cache first (fastest path - 1-2ms)
-    let link = await CacheService.getCachedLink(slug);
+    let link: LinkData | null = await CacheService.getCachedLink(slug) as LinkData | null;
     let cacheHit = false;
 
     if (link) {
@@ -60,11 +81,11 @@ export const redirectController = async (req: Request, res: Response): Promise<v
         return;
       }
 
-      link = linkDoc;
+      link = linkDoc as unknown as LinkData;
       logger.debug(`DB query for slug: ${slug} (${Date.now() - dbStartTime}ms)`);
 
       // Cache the link for future requests (1 hour TTL)
-      await CacheService.setCachedLink(slug, link);
+      await CacheService.setCachedLink(slug, link as unknown as Record<string, unknown>);
     }
 
     // Step 3: Validate link is accessible
@@ -84,7 +105,7 @@ export const redirectController = async (req: Request, res: Response): Promise<v
     }
 
     // Step 4: Handle password-protected links
-    if (link.hasPassword || link.password) {
+    if (link.password) {
       // Check if password is provided in query params
       const { pwd } = req.query;
 
@@ -157,7 +178,9 @@ export const redirectController = async (req: Request, res: Response): Promise<v
       // Step 6: Track click asynchronously (non-blocking)
       // Use setImmediate to defer execution without blocking redirect
       setImmediate(() => {
-        trackClick(req, (link as any)._id?.toString(), (link as any).userId?.toString(), slug);
+        const linkId = '_id' in link && link._id ? link._id.toString() : '';
+        const userId = 'userId' in link && link.userId ? link.userId.toString() : '';
+        trackClick(req, linkId, userId, slug);
         trackUniqueVisitor(slug, req.ip || 'unknown');
       });
     } else {
@@ -176,8 +199,8 @@ export const redirectController = async (req: Request, res: Response): Promise<v
     res.setHeader('X-Redirect-Latency', `${latency}ms`);
 
     // Perform the redirect
-    res.redirect(redirectType, (link as any).originalUrl as string);
-  } catch (error: any) {
+    res.redirect(redirectType, link.originalUrl);
+  } catch (error: unknown) {
     const latency = Date.now() - startTime;
     logger.error(`Error in redirectController for slug ${slug} (${latency}ms):`, error);
 
@@ -258,7 +281,7 @@ export const linkPreviewController = async (req: Request, res: Response): Promis
         latency: `${latency}ms`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const latency = Date.now() - startTime;
     logger.error(`Error in linkPreviewController for slug ${slug} (${latency}ms):`, error);
 
@@ -288,7 +311,7 @@ export const getRedirectStats = async (_req: Request, res: Response): Promise<vo
         uptime: process.uptime(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error getting redirect stats:', error);
 
     res.status(500).json({
@@ -307,7 +330,7 @@ export const getRedirectStats = async (_req: Request, res: Response): Promise<vo
  * @param link - Link document
  * @returns Error object if invalid, null if valid
  */
-const validateLink = (link: any): { statusCode: number; code: string; message: string } | null => {
+const validateLink = (link: LinkData): { statusCode: number; code: string; message: string } | null => {
   // Check if link is active
   if (!link.isActive) {
     return {
@@ -346,7 +369,7 @@ export const serveBotPage = async (req: Request, res: Response): Promise<void> =
   const { slug } = req.params;
 
   try {
-    let link: any = await CacheService.getCachedLink(slug);
+    let link: LinkData | null = await CacheService.getCachedLink(slug) as LinkData | null;
 
     if (!link) {
       const linkDoc = await Link.findOne({ slug }).lean();
@@ -354,7 +377,7 @@ export const serveBotPage = async (req: Request, res: Response): Promise<void> =
         res.status(404).send('Link not found');
         return;
       }
-      link = linkDoc;
+      link = linkDoc as unknown as LinkData;
     }
 
     // Generate HTML with Open Graph meta tags

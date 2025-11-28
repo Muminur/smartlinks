@@ -6,7 +6,7 @@
  * Creates a debounced function that delays invoking func until after wait milliseconds
  * have elapsed since the last time the debounced function was invoked
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -27,13 +27,13 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Creates a debounced async function that returns a promise
  */
-export function debounceAsync<T extends (...args: any[]) => Promise<any>>(
+export function debounceAsync<T extends (...args: unknown[]) => Promise<unknown>>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let timeout: NodeJS.Timeout | null = null;
-  let promiseResolve: ((value: ReturnType<T>) => void) | null = null;
-  let promiseReject: ((reason?: any) => void) | null = null;
+  let promiseResolve: ((value: Awaited<ReturnType<T>>) => void) | null = null;
+  let promiseReject: ((reason?: unknown) => void) | null = null;
 
   return function (...args: Parameters<T>): Promise<ReturnType<T>> {
     return new Promise((resolve, reject) => {
@@ -41,14 +41,14 @@ export function debounceAsync<T extends (...args: any[]) => Promise<any>>(
         clearTimeout(timeout);
       }
 
-      promiseResolve = resolve;
+      promiseResolve = resolve as (value: Awaited<ReturnType<T>>) => void;
       promiseReject = reject;
 
       timeout = setTimeout(async () => {
         try {
           const result = await func(...args);
           if (promiseResolve) {
-            promiseResolve(result);
+            promiseResolve(result as Awaited<ReturnType<T>>);
           }
         } catch (error) {
           if (promiseReject) {
@@ -60,14 +60,14 @@ export function debounceAsync<T extends (...args: any[]) => Promise<any>>(
           promiseReject = null;
         }
       }, wait);
-    });
+    }) as Promise<ReturnType<T>>;
   };
 }
 
 /**
  * Creates a throttled function that only invokes func at most once per every wait milliseconds
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

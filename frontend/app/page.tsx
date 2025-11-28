@@ -77,8 +77,9 @@ export default function Home() {
         qrCode: data.qrCode,
         metadata: data.metadata,
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to shorten URL. Please try again.');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to shorten URL. Please try again.');
     } finally {
       setLoading(false);
     }

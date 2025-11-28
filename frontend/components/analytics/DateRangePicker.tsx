@@ -101,7 +101,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
           <div className="p-4">
             <Calendar
               mode="range"
-              selected={tempRange as any}
+              selected={tempRange.from && tempRange.to ? tempRange as { from: Date; to: Date } : undefined}
               onSelect={(range) => setTempRange(range || {})}
               numberOfMonths={2}
               disabled={{ after: new Date() }}

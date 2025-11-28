@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { Response } from 'express';
 import Analytics, { IAnalyticsDocument } from '../models/analytics.model';
 import Link from '../models/link.model';
 import { CacheService } from './cache.service';
@@ -1209,7 +1210,7 @@ export async function compareLinks(
 export async function exportAnalyticsCSV(
   linkId: string,
   userId: string,
-  res: any,
+  res: Response,
   startDate?: Date,
   endDate?: Date
 ): Promise<void> {
@@ -1250,7 +1251,7 @@ export async function exportAnalyticsCSV(
 export async function exportAnalyticsJSON(
   linkId: string,
   userId: string,
-  res: any,
+  res: Response,
   startDate?: Date,
   endDate?: Date
 ): Promise<void> {
@@ -1281,7 +1282,7 @@ export async function exportAnalyticsJSON(
       .exec();
 
     // Generate JSON
-    const jsonData = exportAnalyticsToJSON(analytics as any, {
+    const jsonData = exportAnalyticsToJSON(analytics as unknown as IAnalyticsDocument[], {
       slug: link.slug,
       startDate,
       endDate,
@@ -1311,7 +1312,7 @@ export async function getTrendingLinks(
   userId: string,
   period: 'day' | 'week' | 'month' = 'week',
   limit: number = 10
-): Promise<any> {
+): Promise<unknown[]> {
   try {
     // Check cache
     const cacheKey = generateCacheKey('trending', userId, { period, limit });
@@ -1463,7 +1464,7 @@ export async function getTrendingLinks(
 /**
  * Get performance metrics for a link
  */
-export async function getPerformanceMetrics(linkId: string, userId: string): Promise<any> {
+export async function getPerformanceMetrics(linkId: string, userId: string): Promise<Record<string, unknown>> {
   try {
     // Verify ownership
     await verifyLinkOwnership(linkId, userId);
@@ -1576,7 +1577,28 @@ export async function getPerformanceMetrics(linkId: string, userId: string): Pro
 /**
  * Generate custom analytics report
  */
-export async function generateCustomReport(userId: string, config: any): Promise<any> {
+interface ReportConfig {
+  linkIds: string[];
+  startDate?: Date;
+  endDate?: Date;
+  groupBy?: string;
+  includeDevices?: boolean;
+  includeGeo?: boolean;
+  includeReferrers?: boolean;
+}
+
+interface CustomReport {
+  generatedAt: string;
+  config: {
+    linkIds: string[];
+    startDate: Date | null;
+    endDate: Date | null;
+    groupBy: string | null;
+  };
+  links: Record<string, unknown>[];
+}
+
+export async function generateCustomReport(userId: string, config: ReportConfig): Promise<CustomReport> {
   try {
     // Verify all links belong to the user
     const links = await Link.find({
@@ -1593,11 +1615,11 @@ export async function generateCustomReport(userId: string, config: any): Promise
     }
 
     // Check cache
-    const cacheKey = generateCacheKey('custom-report', userId, config);
+    const cacheKey = generateCacheKey('custom-report', userId, config as unknown as Record<string, unknown>);
     const cached = await CacheService.getCachedAnalytics(cacheKey);
     if (cached) {
       logger.debug(`Cache HIT for custom report`);
-      return cached;
+      return cached as unknown as CustomReport;
     }
 
     logger.debug(`Cache MISS for custom report`);
@@ -1612,7 +1634,7 @@ export async function generateCustomReport(userId: string, config: any): Promise
     }
 
     // Build report structure
-    const report: any = {
+    const report: CustomReport = {
       generatedAt: new Date().toISOString(),
       config: {
         linkIds: config.linkIds,
@@ -1626,7 +1648,7 @@ export async function generateCustomReport(userId: string, config: any): Promise
     // Get detailed stats for each link
     for (const link of links) {
       const linkIdStr = (link._id as Types.ObjectId).toString();
-      const linkStats: any = {
+      const linkStats: Record<string, unknown> = {
         linkId: linkIdStr,
         slug: link.slug,
         shortUrl: link.shortUrl,
@@ -1726,7 +1748,7 @@ export async function generateCustomReport(userId: string, config: any): Promise
     }
 
     // Cache for 15 minutes
-    await CacheService.cacheAnalytics(cacheKey, report, 900);
+    await CacheService.cacheAnalytics(cacheKey, report as unknown as Record<string, unknown>, 900);
 
     return report;
   } catch (error) {
@@ -1738,7 +1760,7 @@ export async function generateCustomReport(userId: string, config: any): Promise
 /**
  * Get analytics alerts for unusual activity
  */
-export async function getAnalyticsAlerts(userId: string): Promise<any> {
+export async function getAnalyticsAlerts(userId: string): Promise<unknown[]> {
   try {
     // Check cache
     const cacheKey = generateCacheKey('alerts', userId);

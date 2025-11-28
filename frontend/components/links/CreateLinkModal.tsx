@@ -23,8 +23,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button, Input, Label, Checkbox } from '@/components/ui';
-import { Badge } from '@/components/ui';
-import { Alert } from '@/components/ui';
 import {
   Tooltip,
   TooltipContent,
@@ -78,7 +76,7 @@ export function CreateLinkModal({
     formState: { errors },
     reset,
   } = useForm<CreateLinkFormData>({
-    resolver: zodResolver(createLinkSchema) as any,
+    resolver: zodResolver(createLinkSchema),
     defaultValues: {
       generateQR: false,
       tags: [],
@@ -92,19 +90,18 @@ export function CreateLinkModal({
   // Debounced slug availability check
   const checkSlugDebounced = React.useMemo(
     () =>
-      (debounce as any)(async (slug: string) => {
-        if (!slug || slug.length < 3) {
+      debounce((slug) => {
+        if (!slug || typeof slug !== 'string' || slug.length < 3) {
           setCustomSlugStatus('idle');
           return;
         }
 
         setCustomSlugStatus('checking');
-        try {
-          const result = await checkSlugMutation.mutateAsync(slug);
+        checkSlugMutation.mutateAsync(slug).then((result) => {
           setCustomSlugStatus(result.available ? 'available' : 'unavailable');
-        } catch {
+        }).catch(() => {
           setCustomSlugStatus('idle');
-        }
+        });
       }, 500),
     [checkSlugMutation]
   );
@@ -173,7 +170,7 @@ export function CreateLinkModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {step === 'basic' ? (
             <>
               {/* Original URL */}
