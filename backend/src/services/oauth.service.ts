@@ -60,20 +60,34 @@ interface AuthTokens {
 }
 
 class OAuthService {
-  private googleClientId: string;
-  private googleClientSecret: string;
-  private googleCallbackUrl: string;
-  private githubClientId: string;
-  private githubClientSecret: string;
-  private githubCallbackUrl: string;
+  /**
+   * OAuth credentials are read lazily via getters to ensure environment variables
+   * are loaded (via dotenv) before they are accessed. This prevents issues where
+   * the singleton is instantiated at module load time before dotenv.config() runs.
+   */
 
-  constructor() {
-    this.googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-    this.googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
-    this.googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || `${config.FRONTEND_URL}/api/auth/google/callback`;
-    this.githubClientId = process.env.GITHUB_CLIENT_ID || '';
-    this.githubClientSecret = process.env.GITHUB_CLIENT_SECRET || '';
-    this.githubCallbackUrl = process.env.GITHUB_CALLBACK_URL || `${config.FRONTEND_URL}/api/auth/github/callback`;
+  private get googleClientId(): string {
+    return process.env.GOOGLE_CLIENT_ID || '';
+  }
+
+  private get googleClientSecret(): string {
+    return process.env.GOOGLE_CLIENT_SECRET || '';
+  }
+
+  private get googleCallbackUrl(): string {
+    return process.env.GOOGLE_CALLBACK_URL || `${config.FRONTEND_URL}/api/auth/google/callback`;
+  }
+
+  private get githubClientId(): string {
+    return process.env.GITHUB_CLIENT_ID || '';
+  }
+
+  private get githubClientSecret(): string {
+    return process.env.GITHUB_CLIENT_SECRET || '';
+  }
+
+  private get githubCallbackUrl(): string {
+    return process.env.GITHUB_CALLBACK_URL || `${config.FRONTEND_URL}/api/auth/github/callback`;
   }
 
   /**

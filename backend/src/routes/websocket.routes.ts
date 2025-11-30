@@ -25,7 +25,7 @@ router.get(
           timestamp: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (_error) {
       res.status(500).json({
         success: false,
         error: {
@@ -56,7 +56,7 @@ router.get('/health', (_req: Request, res: Response) => {
         timestamp: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       success: false,
       data: {
@@ -89,7 +89,7 @@ router.get(
           timestamp: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (_error) {
       res.status(500).json({
         success: false,
         error: {
