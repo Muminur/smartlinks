@@ -56,12 +56,14 @@ export function FilterToolbar({
   });
 
   // Debounced search handler
-  const debouncedSearch = React.useCallback(
-    debounce((value) => {
-      if (typeof value === 'string') {
-        onFiltersChange({ search: value });
-      }
-    }, 500),
+  const debouncedSearch = React.useMemo(
+    () =>
+      debounce((...args: unknown[]) => {
+        const value = args[0];
+        if (typeof value === 'string') {
+          onFiltersChange({ search: value });
+        }
+      }, 500),
     [onFiltersChange]
   );
 
