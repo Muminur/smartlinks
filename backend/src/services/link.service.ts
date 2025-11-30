@@ -188,9 +188,10 @@ class LinkService {
     }
   }
 
-  async generateSlug(customSlug: string | undefined, userPlanType: string): Promise<string> {
+  async generateSlug(customSlug: string | undefined | null, userPlanType: string): Promise<string> {
     try {
-      if (customSlug) {
+      // If customSlug is provided and not empty, validate and use it
+      if (customSlug && customSlug.trim().length > 0) {
         this.validateCustomSlug(customSlug, userPlanType);
 
         const available = await isSlugAvailable(customSlug);
@@ -201,6 +202,7 @@ class LinkService {
         return customSlug.toLowerCase();
       }
 
+      // Generate random slug if no custom slug provided or empty
       return await generateUniqueSlug();
     } catch (error) {
       logger.error('Error generating slug:', error);

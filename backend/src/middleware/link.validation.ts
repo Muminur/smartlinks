@@ -19,6 +19,7 @@ export const shortenUrlSchema = Joi.object({
     .max(50)
     .pattern(/^[a-z0-9-]+$/)
     .optional()
+    .allow('', null) // Allow empty string or null - will generate random slug
     .messages({
       'string.min': 'Custom slug must be at least 3 characters long',
       'string.max': 'Custom slug cannot exceed 50 characters',
