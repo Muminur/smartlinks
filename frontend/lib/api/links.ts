@@ -79,15 +79,14 @@ export async function bulkDeleteLinks(linkIds: string[]): Promise<void> {
 }
 
 /**
- * Activate/Deactivate a link
+ * Toggle link active status
  */
 export async function toggleLinkStatus(
   id: string,
-  isActive: boolean
+  _isActive?: boolean
 ): Promise<Link> {
   const response = await api.patch<ApiResponse<{ link: Link }>>(
-    `/links/${id}/status`,
-    { isActive }
+    `/links/${id}/toggle`
   );
   return response.data.data!.link;
 }
@@ -141,13 +140,14 @@ export async function getLinkPreview(
 }
 
 /**
- * Generate QR code for a link
+ * Get QR code for a link
  */
 export async function generateQRCode(
   linkId: string
 ): Promise<{ qrCode: string }> {
-  const response = await api.post<ApiResponse<{ qrCode: string }>>(
-    `/links/${linkId}/qr-code`
+  const response = await api.get<ApiResponse<{ qrCode: string }>>(
+    `/links/${linkId}/qr`,
+    { params: { format: 'base64' } }
   );
   return response.data.data!;
 }

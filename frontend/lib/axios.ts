@@ -108,12 +108,12 @@ api.interceptors.response.use(
             { withCredentials: true }
           );
 
-          const { token } = response.data.data;
-          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+          const { accessToken } = response.data.data;
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
 
           // Retry original request with new token
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           }
           return api(originalRequest);
         }

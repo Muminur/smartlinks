@@ -116,9 +116,8 @@ export const authApi = {
   async verifyEmail(
     data: VerifyEmailRequest
   ): Promise<ApiResponse<{ message: string }>> {
-    const response = await api.post<ApiResponse<{ message: string }>>(
-      '/auth/verify-email',
-      data
+    const response = await api.get<ApiResponse<{ message: string }>>(
+      `/auth/verify-email/${data.token}`
     );
     return response.data;
   },
@@ -136,8 +135,8 @@ export const authApi = {
   /**
    * Get current user
    */
-  async getCurrentUser(): Promise<ApiResponse<User>> {
-    const response = await api.get<ApiResponse<User>>('/auth/me');
+  async getCurrentUser(): Promise<ApiResponse<{ user: User }>> {
+    const response = await api.get<ApiResponse<{ user: User }>>('/auth/me');
     return response.data;
   },
 
@@ -147,7 +146,7 @@ export const authApi = {
   async changePassword(
     data: ChangePasswordRequest
   ): Promise<ApiResponse<{ message: string }>> {
-    const response = await api.post<ApiResponse<{ message: string }>>(
+    const response = await api.put<ApiResponse<{ message: string }>>(
       '/auth/change-password',
       data
     );
