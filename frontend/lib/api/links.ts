@@ -5,6 +5,7 @@ import type {
   UpdateLinkData,
   LinkFilters,
   PaginatedResponse,
+  BackendPaginatedResponse,
   ApiResponse,
 } from '@/types';
 import { debounceAsync } from '@/lib/utils/debounce';
@@ -15,15 +16,26 @@ import { debounceAsync } from '@/lib/utils/debounce';
 
 /**
  * Get all links with pagination and filters
+ * Transforms backend pagination format to frontend format
  */
 export async function getLinks(
   params?: LinkFilters & { page?: number; limit?: number }
 ): Promise<PaginatedResponse<Link>> {
-  const response = await api.get<ApiResponse<PaginatedResponse<Link>>>(
+  const response = await api.get<ApiResponse<BackendPaginatedResponse<Link>>>(
     '/links',
     { params }
   );
-  return response.data.data!;
+
+  const backendData = response.data.data!;
+
+  // Transform backend pagination format to frontend format
+  return {
+    data: backendData.data,
+    total: backendData.pagination.totalItems,
+    page: backendData.pagination.currentPage,
+    limit: backendData.pagination.itemsPerPage,
+    totalPages: backendData.pagination.totalPages,
+  };
 }
 
 /**

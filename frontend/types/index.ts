@@ -90,6 +90,19 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Backend pagination response format (what the API actually returns)
+export interface BackendPaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
 // Analytics types
 export interface Analytics {
   totalClicks: number;
