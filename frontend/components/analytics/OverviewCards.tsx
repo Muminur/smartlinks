@@ -12,6 +12,7 @@ import {
   Timer
 } from 'lucide-react';
 import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, AnalyticsSummary } from '@/types/analytics';
 import { cn } from '@/lib/utils';
 
@@ -88,18 +89,17 @@ export default function OverviewCards({ linkId, dateRange }: OverviewCardsProps)
   const { data, isLoading, error } = useQuery<{ success: boolean; data: AnalyticsSummary }>({
     queryKey: ['analytics-summary', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+      };
 
       const endpoint = linkId === 'all'
-        ? `/analytics/summary?${params}`
-        : API_ENDPOINTS.ANALYTICS.SUMMARY(linkId) + `?${params}`;
+        ? API_ENDPOINTS.ANALYTICS.USER
+        : API_ENDPOINTS.ANALYTICS.SUMMARY(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch analytics summary');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
     refetchInterval: 60000, // Refetch every minute
   });

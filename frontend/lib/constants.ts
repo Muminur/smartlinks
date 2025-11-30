@@ -34,20 +34,23 @@ export const API_ENDPOINTS = {
     BULK_CREATE: '/links/bulk',
     BULK_DELETE: '/links/bulk',
   },
-  // Analytics endpoints
+  // Analytics endpoints - matches backend routes at /api/analytics/link/:linkId/*
   ANALYTICS: {
-    SUMMARY: (linkId: string) => `/analytics/${linkId}/summary`,
-    GEOGRAPHIC: (linkId: string) => `/analytics/${linkId}/geographic`,
-    DEVICES: (linkId: string) => `/analytics/${linkId}/devices`,
-    BROWSERS: (linkId: string) => `/analytics/${linkId}/browsers`,
-    OS: (linkId: string) => `/analytics/${linkId}/os`,
-    REFERRERS: (linkId: string) => `/analytics/${linkId}/referrers`,
-    TIME_SERIES: (linkId: string) => `/analytics/${linkId}/time-series`,
+    SUMMARY: (linkId: string) => `/analytics/link/${linkId}/summary`,
+    GEOGRAPHIC: (linkId: string) => `/analytics/link/${linkId}/geographic`,
+    DEVICES: (linkId: string) => `/analytics/link/${linkId}/devices`,
+    BROWSERS: (linkId: string) => `/analytics/link/${linkId}/browsers`,
+    OS: (linkId: string) => `/analytics/link/${linkId}/os`,
+    REFERRERS: (linkId: string) => `/analytics/link/${linkId}/referrers`,
+    TIMELINE: (linkId: string) => `/analytics/link/${linkId}/timeline`,
     TRENDING: '/analytics/trending',
-    PERFORMANCE: (linkId: string) => `/analytics/${linkId}/performance`,
-    EXPORT: (linkId: string) => `/analytics/${linkId}/export`,
+    PERFORMANCE: (linkId: string) => `/analytics/link/${linkId}/performance`,
+    EXPORT_CSV: (linkId: string) => `/analytics/link/${linkId}/export/csv`,
+    EXPORT_JSON: (linkId: string) => `/analytics/link/${linkId}/export/json`,
     COMPARE: '/analytics/compare',
     CUSTOM: '/analytics/custom-report',
+    USER: '/analytics/user',
+    ALERTS: '/analytics/alerts',
   },
   // Domain endpoints
   DOMAINS: {

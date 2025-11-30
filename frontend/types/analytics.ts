@@ -36,18 +36,27 @@ export interface DeviceData {
   device: string;
   clicks: number;
   percentage: number;
+  // Backend may return these alternative fields
+  _id?: string;
+  count?: number;
 }
 
 export interface BrowserData {
   browser: string;
   clicks: number;
   percentage: number;
+  // Backend may return these alternative fields
+  _id?: string;
+  count?: number;
 }
 
 export interface OSData {
   os: string;
   clicks: number;
   percentage: number;
+  // Backend may return these alternative fields
+  _id?: string;
+  count?: number;
 }
 
 export interface ReferrerData {
@@ -55,8 +64,11 @@ export interface ReferrerData {
   domain: string;
   clicks: number;
   percentage: number;
-  bounceRate: number;
-  avgTimeOnSite: number;
+  bounceRate?: number;
+  avgTimeOnSite?: number;
+  // Backend may return these alternative fields
+  _id?: string;
+  count?: number;
 }
 
 export interface HourlyData {

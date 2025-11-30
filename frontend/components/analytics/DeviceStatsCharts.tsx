@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Monitor, Smartphone, Globe } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { API_ENDPOINTS, CHART_COLORS_ARRAY } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, DeviceData, BrowserData, OSData } from '@/types/analytics';
 
 interface DeviceStatsChartsProps {
@@ -134,71 +135,50 @@ function OSChart({ data, isLoading }: { data?: OSData[]; isLoading: boolean }) {
 }
 
 export default function DeviceStatsCharts({ linkId, dateRange }: DeviceStatsChartsProps) {
+  // Device stats endpoint returns all device data including browsers and OS
   const { data: deviceData, isLoading: deviceLoading } = useQuery<{
     success: boolean;
-    data: DeviceData[];
+    data: {
+      deviceTypeBreakdown?: DeviceData[];
+      browserDistribution?: BrowserData[];
+      osDistribution?: OSData[];
+    };
   }>({
     queryKey: ['analytics-devices', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+      };
 
       const endpoint =
         linkId === 'all'
-          ? `/analytics/devices?${params}`
-          : API_ENDPOINTS.ANALYTICS.DEVICES(linkId) + `?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.DEVICES(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch device data');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
   });
 
-  const { data: browserData, isLoading: browserLoading } = useQuery<{
-    success: boolean;
-    data: BrowserData[];
-  }>({
-    queryKey: ['analytics-browsers', linkId, dateRange],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: dateRange.start.toISOString(),
-        endDate: dateRange.end.toISOString(),
-      });
+  // Transform data to match component expectations
+  const deviceStats: DeviceData[] = deviceData?.data?.deviceTypeBreakdown?.map(d => ({
+    device: d.device || d._id || 'Unknown',
+    clicks: d.clicks || d.count || 0,
+    percentage: d.percentage || 0,
+  })) || [];
 
-      const endpoint =
-        linkId === 'all'
-          ? `/analytics/browsers?${params}`
-          : API_ENDPOINTS.ANALYTICS.BROWSERS(linkId) + `?${params}`;
+  const browserStats: BrowserData[] = deviceData?.data?.browserDistribution?.map(d => ({
+    browser: d.browser || d._id || 'Unknown',
+    clicks: d.clicks || d.count || 0,
+    percentage: d.percentage || 0,
+  })) || [];
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch browser data');
-      return response.json();
-    },
-  });
-
-  const { data: osData, isLoading: osLoading } = useQuery<{
-    success: boolean;
-    data: OSData[];
-  }>({
-    queryKey: ['analytics-os', linkId, dateRange],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        startDate: dateRange.start.toISOString(),
-        endDate: dateRange.end.toISOString(),
-      });
-
-      const endpoint =
-        linkId === 'all'
-          ? `/analytics/os?${params}`
-          : API_ENDPOINTS.ANALYTICS.OS(linkId) + `?${params}`;
-
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch OS data');
-      return response.json();
-    },
-  });
+  const osStats: OSData[] = deviceData?.data?.osDistribution?.map(d => ({
+    os: d.os || d._id || 'Unknown',
+    clicks: d.clicks || d.count || 0,
+    percentage: d.percentage || 0,
+  })) || [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -211,7 +191,7 @@ export default function DeviceStatsCharts({ linkId, dateRange }: DeviceStatsChar
           </div>
         </CardHeader>
         <CardContent>
-          <DeviceChart data={deviceData?.data} isLoading={deviceLoading} />
+          <DeviceChart data={deviceStats} isLoading={deviceLoading} />
         </CardContent>
       </Card>
 
@@ -224,7 +204,7 @@ export default function DeviceStatsCharts({ linkId, dateRange }: DeviceStatsChar
           </div>
         </CardHeader>
         <CardContent>
-          <BrowserChart data={browserData?.data} isLoading={browserLoading} />
+          <BrowserChart data={browserStats} isLoading={deviceLoading} />
         </CardContent>
       </Card>
 
@@ -237,7 +217,7 @@ export default function DeviceStatsCharts({ linkId, dateRange }: DeviceStatsChar
           </div>
         </CardHeader>
         <CardContent>
-          <OSChart data={osData?.data} isLoading={osLoading} />
+          <OSChart data={osStats} isLoading={deviceLoading} />
         </CardContent>
       </Card>
     </div>

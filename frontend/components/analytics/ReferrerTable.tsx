@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExternalLink, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, ReferrerData } from '@/types/analytics';
 
 interface ReferrerTableProps {
@@ -37,30 +38,39 @@ export default function ReferrerTable({ linkId, dateRange }: ReferrerTableProps)
 
   const { data, isLoading, error } = useQuery<{
     success: boolean;
-    data: ReferrerData[];
+    data: { topReferrers?: ReferrerData[] };
   }>({
     queryKey: ['analytics-referrers', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+      };
 
       const endpoint =
         linkId === 'all'
-          ? `/analytics/referrers?${params}`
-          : API_ENDPOINTS.ANALYTICS.REFERRERS(linkId) + `?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.REFERRERS(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch referrer data');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
   });
 
-  const filteredAndSortedData = useMemo(() => {
-    if (!data?.data) return [];
+  // Transform referrer data from backend format
+  const referrerData = data?.data?.topReferrers?.map(r => ({
+    referrer: r.referrer || r._id || 'Direct',
+    domain: r.domain || (r.referrer ? new URL(r.referrer).hostname : 'Direct'),
+    clicks: r.clicks || r.count || 0,
+    percentage: r.percentage || 0,
+    bounceRate: r.bounceRate,
+    avgTimeOnSite: r.avgTimeOnSite,
+  })) || [];
 
-    let filtered = data.data;
+  const filteredAndSortedData = useMemo(() => {
+    if (!referrerData || referrerData.length === 0) return [];
+
+    let filtered = [...referrerData];
 
     // Apply search filter
     if (search) {
@@ -72,13 +82,8 @@ export default function ReferrerTable({ linkId, dateRange }: ReferrerTableProps)
 
     // Apply sorting
     filtered.sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
-
-      if (sortField === 'referrer' || sortField === 'percentage') {
-        aValue = String(aValue);
-        bValue = String(bValue);
-      }
+      const aValue = a[sortField] ?? 0;
+      const bValue = b[sortField] ?? 0;
 
       if (sortDirection === 'asc') {
         return aValue > bValue ? 1 : -1;
@@ -88,7 +93,7 @@ export default function ReferrerTable({ linkId, dateRange }: ReferrerTableProps)
     });
 
     return filtered;
-  }, [data?.data, search, sortField, sortDirection]);
+  }, [referrerData, search, sortField, sortDirection]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;

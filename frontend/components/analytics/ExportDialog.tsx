@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Download, FileText, FileJson, FileSpreadsheet, Mail } from 'lucide-react';
 import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange } from '@/types/analytics';
 import { format as formatDate } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -71,27 +72,29 @@ export default function ExportDialog({ open, onClose, linkId, dateRange }: Expor
     setIsExporting(true);
 
     try {
-      const params = new URLSearchParams({
+      const params = {
         format,
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
         metrics: selectedMetrics.join(','),
         includeCharts: includeCharts.toString(),
-      });
+      };
 
+      // Use CSV or JSON export endpoint based on format
       const endpoint =
         linkId === 'all'
-          ? `/analytics/export?${params}`
-          : API_ENDPOINTS.ANALYTICS.EXPORT(linkId) + `?${params}`;
+          ? `/analytics/export/${format}`
+          : format === 'csv'
+            ? API_ENDPOINTS.ANALYTICS.EXPORT_CSV(linkId)
+            : API_ENDPOINTS.ANALYTICS.EXPORT_JSON(linkId);
 
-      const response = await fetch(endpoint);
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
+      const response = await api.get(endpoint, {
+        params,
+        responseType: 'blob'
+      });
 
       // Download file
-      const blob = await response.blob();
+      const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { API_ENDPOINTS, CHART_COLORS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, TimeSeriesData, TimeGranularity } from '@/types/analytics';
 import { format } from 'date-fns';
 
@@ -41,20 +42,19 @@ export default function ClicksChart({ linkId, dateRange }: ClicksChartProps) {
   }>({
     queryKey: ['analytics-timeseries', linkId, dateRange, granularity],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-        granularity,
-      });
+        period: granularity === 'hourly' ? 'hour' : granularity === 'daily' ? 'day' : granularity === 'weekly' ? 'week' : 'month',
+      };
 
       const endpoint =
         linkId === 'all'
-          ? `/analytics/time-series?${params}`
-          : API_ENDPOINTS.ANALYTICS.TIME_SERIES(linkId) + `?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.TIMELINE(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch time series data');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
     refetchInterval: 60000,
   });
