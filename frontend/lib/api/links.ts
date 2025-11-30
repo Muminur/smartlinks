@@ -26,15 +26,26 @@ export async function getLinks(
     { params }
   );
 
-  const backendData = response.data.data!;
+  // Handle case where API returns success: false or data is missing
+  if (!response.data.success || !response.data.data) {
+    const errorMessage = response.data.error?.message || response.data.message || 'Failed to fetch links';
+    throw new Error(errorMessage);
+  }
+
+  const backendData = response.data.data;
+
+  // Validate that pagination data exists
+  if (!backendData.pagination) {
+    throw new Error('Invalid response format: missing pagination data');
+  }
 
   // Transform backend pagination format to frontend format
   return {
-    data: backendData.data,
-    total: backendData.pagination.totalItems,
-    page: backendData.pagination.currentPage,
-    limit: backendData.pagination.itemsPerPage,
-    totalPages: backendData.pagination.totalPages,
+    data: backendData.data || [],
+    total: backendData.pagination.totalItems || 0,
+    page: backendData.pagination.currentPage || 1,
+    limit: backendData.pagination.itemsPerPage || 20,
+    totalPages: backendData.pagination.totalPages || 0,
   };
 }
 
@@ -93,14 +104,17 @@ export async function bulkDeleteLinks(linkIds: string[]): Promise<void> {
 /**
  * Toggle link active status
  */
-export async function toggleLinkStatus(
-  id: string,
-  _isActive?: boolean
-): Promise<Link> {
+export async function toggleLinkStatus(id: string): Promise<Link> {
   const response = await api.patch<ApiResponse<{ link: Link }>>(
     `/links/${id}/toggle`
   );
-  return response.data.data!.link;
+
+  if (!response.data.success || !response.data.data) {
+    const errorMessage = response.data.error?.message || 'Failed to toggle link status';
+    throw new Error(errorMessage);
+  }
+
+  return response.data.data.link;
 }
 
 /**

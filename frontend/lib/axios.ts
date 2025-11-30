@@ -85,12 +85,15 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Log error in development
+    // Log error in development with more detail
     if (process.env.NODE_ENV === 'development') {
       console.error('[API Error]', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
+        url: originalRequest?.url,
+        method: originalRequest?.method,
+        status: error.response?.status || 'No response',
+        data: error.response?.data || 'No data',
+        message: error.message || 'Unknown error',
+        code: error.code,
       });
     }
 

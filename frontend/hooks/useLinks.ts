@@ -33,6 +33,18 @@ export function useLinks(
     queryKey: linksKeys.list(filters || {}),
     queryFn: () => linksApi.getLinks(filters),
     staleTime: 30000, // 30 seconds
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors
+      const err = error as { status?: number; message?: string };
+      if (err.status === 401 || err.status === 403) {
+        return false;
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2;
+    },
+    meta: {
+      errorMessage: 'Failed to load links',
+    },
   });
 }
 
@@ -199,8 +211,8 @@ export function useToggleLinkStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      linksApi.toggleLinkStatus(id, isActive),
+    mutationFn: ({ id }: { id: string; isActive?: boolean }) =>
+      linksApi.toggleLinkStatus(id),
     onSuccess: (updatedLink) => {
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: linksKeys.lists() });
@@ -213,8 +225,8 @@ export function useToggleLinkStatus() {
       );
     },
     onError: (error: unknown) => {
-      const err = error as { response?: { data?: { error?: { message?: string } } } };
-      toast.error(err?.response?.data?.error?.message || 'Failed to update link status');
+      const err = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.message || err?.response?.data?.error?.message || 'Failed to update link status');
     },
   });
 }

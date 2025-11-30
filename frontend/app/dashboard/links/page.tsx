@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Upload, RefreshCw } from 'lucide-react';
+import { Plus, Upload, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { LinksTable } from '@/components/links/LinksTable';
 import { FilterToolbar } from '@/components/links/FilterToolbar';
@@ -40,8 +40,16 @@ export default function LinksPage() {
   const { filters, page, limit, setFilters, setPage, setLimit, resetFilters } = useLinkStore();
 
   // Queries
-  const { data, isLoading, refetch } = useLinks({ ...filters, page, limit });
+  const { data, isLoading, error, refetch } = useLinks({ ...filters, page, limit });
   const { data: tags } = useTags();
+
+  // Show error toast when links fail to load
+  React.useEffect(() => {
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load links';
+      toast.error(errorMessage);
+    }
+  }, [error]);
 
   // Mutations
   const bulkDeleteMutation = useBulkDeleteLinks();
@@ -204,8 +212,26 @@ export default function LinksPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            <div className="flex-1">
+              <p className="font-medium text-destructive">Failed to load links</p>
+              <p className="text-sm text-muted-foreground">
+                {error instanceof Error ? error.message : 'An unexpected error occurred'}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
-      {data && (
+      {data && !error && (
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-lg border bg-card p-6">
             <div className="text-sm font-medium text-muted-foreground">
