@@ -157,22 +157,24 @@ export async function generateQRCode(
  */
 export async function getLinkAnalytics(linkId: string): Promise<{
   totalClicks: number;
-  uniqueClicks: number;
+  uniqueVisitors: number;
   clicksByDate: { date: string; clicks: number }[];
-  clicksByCountry: { country: string; clicks: number }[];
-  clicksByDevice: { device: string; clicks: number }[];
-  clicksByBrowser: { browser: string; clicks: number }[];
+  topCountries: { country: string; count: number }[];
+  topDevices: { device: string; count: number }[];
+  topBrowsers: { browser: string; count: number }[];
+  topReferrers: { referrer: string; count: number }[];
 }> {
   const response = await api.get<
     ApiResponse<{
       totalClicks: number;
-      uniqueClicks: number;
+      uniqueVisitors: number;
       clicksByDate: { date: string; clicks: number }[];
-      clicksByCountry: { country: string; clicks: number }[];
-      clicksByDevice: { device: string; clicks: number }[];
-      clicksByBrowser: { browser: string; clicks: number }[];
+      topCountries: { country: string; count: number }[];
+      topDevices: { device: string; count: number }[];
+      topBrowsers: { browser: string; count: number }[];
+      topReferrers: { referrer: string; count: number }[];
     }>
-  >(`/analytics/${linkId}/summary`);
+  >(`/analytics/link/${linkId}/summary`);
   return response.data.data!;
 }
 

@@ -19,6 +19,7 @@ export interface Link {
   _id: string;
   slug: string;
   originalUrl: string;
+  shortUrl: string;
   customSlug?: string;
   title?: string;
   description?: string;
