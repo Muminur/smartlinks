@@ -4,9 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, MapPin, Monitor, Globe, ExternalLink } from 'lucide-react';
+import { Activity, MapPin, Monitor, Globe, ExternalLink, Clock } from 'lucide-react';
 import type { RealtimeClick } from '@/types/analytics';
 import { formatDistanceToNow } from 'date-fns';
+import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 
 interface RealtimePanelProps {
   linkId: string;
@@ -73,26 +75,47 @@ function ClickItem({ click }: { click: RealtimeClick }) {
 }
 
 export default function RealtimePanel({ linkId }: RealtimePanelProps) {
+  // Fetch recent analytics data using the timeline endpoint
+  // Note: Real realtime WebSocket/SSE support would require backend implementation
   const { data, isLoading, error } = useQuery<{
     success: boolean;
     data: {
       clicks: RealtimeClick[];
       activeUsers: number;
       clicksLast5Min: number;
+      totalClicks?: number;
+      timeline?: { period: string; clicks: number }[];
     };
   }>({
     queryKey: ['analytics-realtime', linkId],
     queryFn: async () => {
+      // Use timeline endpoint with hourly data for recent activity
       const endpoint =
         linkId === 'all'
-          ? '/analytics/realtime'
-          : `/analytics/${linkId}/realtime`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.TIMELINE(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch realtime data');
-      return response.json();
+      const params = linkId === 'all' ? {} : { period: 'hour' };
+      const response = await api.get(endpoint, { params });
+
+      // Transform timeline data to realtime-like format
+      const responseData = response.data.data;
+
+      // Calculate clicks in last 5 minutes (approximation from hourly data)
+      const recentClicks = responseData?.timeline?.slice(-1)?.[0]?.clicks || 0;
+
+      return {
+        success: true,
+        data: {
+          clicks: [], // Realtime clicks require WebSocket - not implemented yet
+          activeUsers: 0, // Would require WebSocket tracking
+          clicksLast5Min: Math.floor(recentClicks / 12), // Approximate from hourly
+          totalClicks: responseData?.totalClicks || 0,
+          timeline: responseData?.timeline || [],
+        },
+      };
     },
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds (less aggressive without WebSocket)
   });
 
   if (error) {
@@ -199,9 +222,14 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
             </div>
           ) : (
             <div className="py-12 text-center">
-              <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground">
-                No recent clicks. Waiting for activity...
+              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground mb-2">
+                Live click feed coming soon
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Real-time click tracking requires WebSocket support.
+                <br />
+                Check the timeline and summary analytics for recent activity.
               </p>
             </div>
           )}

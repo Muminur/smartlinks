@@ -165,8 +165,9 @@ export const authApi = {
 
   /**
    * OAuth login (Google, GitHub)
+   * Backend routes: GET /api/auth/google, GET /api/auth/github
    */
   getOAuthUrl(provider: 'google' | 'github'): string {
-    return `${api.defaults.baseURL}/auth/oauth/${provider}`;
+    return `${api.defaults.baseURL}/auth/${provider}`;
   },
 };

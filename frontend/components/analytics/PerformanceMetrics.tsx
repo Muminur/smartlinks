@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Zap, Clock, Activity, CheckCircle2, XCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { API_ENDPOINTS, CHART_COLORS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, PerformanceMetrics as PerformanceMetricsType } from '@/types/analytics';
 
 interface PerformanceMetricsProps {
@@ -20,19 +21,18 @@ export default function PerformanceMetrics({ linkId, dateRange }: PerformanceMet
   }>({
     queryKey: ['analytics-performance', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+      };
 
       const endpoint =
         linkId === 'all'
-          ? `/analytics/performance?${params}`
-          : API_ENDPOINTS.ANALYTICS.PERFORMANCE(linkId) + `?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.PERFORMANCE(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch performance metrics');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
   });
 

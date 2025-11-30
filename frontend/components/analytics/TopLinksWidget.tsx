@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Link2, ExternalLink } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
+import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, TopLink } from '@/types/analytics';
 import { cn } from '@/lib/utils';
 
@@ -19,15 +21,14 @@ export default function TopLinksWidget({ dateRange }: TopLinksWidgetProps) {
   }>({
     queryKey: ['analytics-top-links', dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
         limit: '10',
-      });
+      };
 
-      const response = await fetch(`/analytics/trending?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch top links');
-      return response.json();
+      const response = await api.get(API_ENDPOINTS.ANALYTICS.TRENDING, { params });
+      return response.data;
     },
     refetchInterval: 60000,
   });

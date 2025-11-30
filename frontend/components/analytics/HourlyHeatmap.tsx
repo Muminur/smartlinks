@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Clock } from 'lucide-react';
+import { API_ENDPOINTS } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, HourlyData } from '@/types/analytics';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -22,20 +24,32 @@ export default function HourlyHeatmap({ linkId, dateRange }: HourlyHeatmapProps)
   }>({
     queryKey: ['analytics-hourly', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+        period: 'hour',
+      };
 
-      // Use a custom endpoint for hourly heatmap data
+      // Use timeline endpoint with hourly period for heatmap data
       const endpoint =
         linkId === 'all'
-          ? `/analytics/hourly?${params}`
-          : `/analytics/${linkId}/hourly?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.TIMELINE(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch hourly data');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+
+      // Transform timeline data to hourly heatmap format
+      const timeline = response.data.data?.timeline || [];
+      const hourlyData: HourlyData[] = timeline.map((item: { period: string; clicks: number }) => {
+        const date = new Date(item.period);
+        return {
+          hour: date.getHours(),
+          day: date.getDay(),
+          clicks: item.clicks,
+        };
+      });
+
+      return { success: true, data: hourlyData };
     },
   });
 
