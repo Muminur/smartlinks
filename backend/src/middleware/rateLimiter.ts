@@ -33,8 +33,8 @@ export const apiLimiter = rateLimit({
 // Strict rate limiter for authentication endpoints
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login/register requests per windowMs
-  skipSuccessfulRequests: true,
+  max: 20, // Limit each IP to 20 failed login/register requests per windowMs
+  skipSuccessfulRequests: true, // Only count failed attempts - successful logins don't count
   message: {
     success: false,
     error: {
