@@ -1,8 +1,10 @@
+import http from 'http';
 import app from './app';
 import { config } from './config/env';
 import { connectDB } from './config/database';
 import { connectRedis } from './config/redis';
 import { logger } from './utils/logger';
+import { websocketService } from './services/websocket.service';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
@@ -36,15 +38,26 @@ const startServer = async (): Promise<void> => {
       logger.info('Analytics cron jobs disabled in development mode');
     }
 
-    // Start Express server
-    const server = app.listen(config.PORT, () => {
+    // Create HTTP server from Express app
+    const server = http.createServer(app);
+
+    // Initialize WebSocket server with HTTP server
+    websocketService.initialize(server);
+    logger.info('WebSocket server attached to HTTP server');
+
+    // Start HTTP server
+    server.listen(config.PORT, () => {
       logger.info(`Server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
       logger.info(`API available at http://localhost:${config.PORT}/api`);
+      logger.info(`WebSocket available at ws://localhost:${config.PORT}`);
     });
 
     // Graceful shutdown
     const gracefulShutdown = async (signal: string): Promise<void> => {
       logger.info(`${signal} received. Starting graceful shutdown...`);
+
+      // Close WebSocket connections first
+      await websocketService.close();
 
       server.close(async () => {
         logger.info('HTTP server closed');

@@ -1,20 +1,40 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, MapPin, Monitor, Globe, ExternalLink, Clock } from 'lucide-react';
+import { Activity, MapPin, Monitor, Globe, ExternalLink, Clock, Wifi, WifiOff } from 'lucide-react';
 import type { RealtimeClick } from '@/types/analytics';
 import { formatDistanceToNow } from 'date-fns';
 import { API_ENDPOINTS } from '@/lib/constants';
 import api from '@/lib/axios';
+import { useLinkAnalytics, useGlobalAnalytics } from '@/hooks/useWebSocket';
+import type { RealtimeClickEvent } from '@/lib/websocket';
 
 interface RealtimePanelProps {
   linkId: string;
 }
 
-function ClickItem({ click }: { click: RealtimeClick }) {
+/**
+ * Convert WebSocket click event to RealtimeClick format
+ */
+function convertToRealtimeClick(event: RealtimeClickEvent): RealtimeClick {
+  return {
+    id: event.id,
+    timestamp: event.timestamp,
+    country: event.country,
+    countryCode: event.countryCode,
+    city: event.city,
+    device: event.device,
+    browser: event.browser,
+    os: event.os,
+    referrer: event.referrer,
+  };
+}
+
+function ClickItem({ click, isNew = false }: { click: RealtimeClick; isNew?: boolean }) {
   const getDeviceIcon = (device: string) => {
     switch (device.toLowerCase()) {
       case 'mobile':
@@ -29,7 +49,7 @@ function ClickItem({ click }: { click: RealtimeClick }) {
   };
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors animate-fade-in">
+    <div className={`flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors ${isNew ? 'animate-pulse bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'animate-fade-in'}`}>
       {/* Device Icon */}
       <div className="text-2xl">{getDeviceIcon(click.device)}</div>
 
@@ -54,7 +74,7 @@ function ClickItem({ click }: { click: RealtimeClick }) {
             <Globe className="h-3 w-3" />
             {click.browser}
           </div>
-          <span>•</span>
+          <span>-</span>
           <span>{click.os}</span>
         </div>
 
@@ -75,8 +95,52 @@ function ClickItem({ click }: { click: RealtimeClick }) {
 }
 
 export default function RealtimePanel({ linkId }: RealtimePanelProps) {
-  // Fetch recent analytics data using the timeline endpoint
-  // Note: Real realtime WebSocket/SSE support would require backend implementation
+  // Track which clicks are "new" for animation purposes
+  const [newClickIds, setNewClickIds] = useState<Set<string>>(new Set());
+
+  // Use appropriate WebSocket hook based on linkId
+  const isGlobalView = linkId === 'all';
+
+  // WebSocket hooks for real-time data
+  const linkAnalytics = useLinkAnalytics(isGlobalView ? '' : linkId, {
+    autoConnect: !isGlobalView,
+    maxClickHistory: 50,
+    onNewClick: (click) => {
+      // Mark click as new for animation
+      setNewClickIds((prev) => new Set([...prev, click.id]));
+      // Remove "new" status after animation
+      setTimeout(() => {
+        setNewClickIds((prev) => {
+          const updated = new Set(prev);
+          updated.delete(click.id);
+          return updated;
+        });
+      }, 3000);
+    },
+  });
+
+  const globalAnalytics = useGlobalAnalytics({
+    autoConnect: isGlobalView,
+    maxClickHistory: 50,
+    onNewClick: (click) => {
+      setNewClickIds((prev) => new Set([...prev, click.id]));
+      setTimeout(() => {
+        setNewClickIds((prev) => {
+          const updated = new Set(prev);
+          updated.delete(click.id);
+          return updated;
+        });
+      }, 3000);
+    },
+  });
+
+  // Select the appropriate analytics based on view mode
+  const wsAnalytics = isGlobalView ? globalAnalytics : linkAnalytics;
+
+  // Convert WebSocket clicks to RealtimeClick format
+  const realtimeClicks: RealtimeClick[] = wsAnalytics.recentClicks.map(convertToRealtimeClick);
+
+  // Fetch historical analytics data as fallback
   const { data, isLoading, error } = useQuery<{
     success: boolean;
     data: {
@@ -89,7 +153,6 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
   }>({
     queryKey: ['analytics-realtime', linkId],
     queryFn: async () => {
-      // Use timeline endpoint with hourly data for recent activity
       const endpoint =
         linkId === 'all'
           ? API_ENDPOINTS.ANALYTICS.USER
@@ -97,25 +160,21 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
 
       const params = linkId === 'all' ? {} : { period: 'hour' };
       const response = await api.get(endpoint, { params });
-
-      // Transform timeline data to realtime-like format
       const responseData = response.data.data;
-
-      // Calculate clicks in last 5 minutes (approximation from hourly data)
       const recentClicks = responseData?.timeline?.slice(-1)?.[0]?.clicks || 0;
 
       return {
         success: true,
         data: {
-          clicks: [], // Realtime clicks require WebSocket - not implemented yet
-          activeUsers: 0, // Would require WebSocket tracking
-          clicksLast5Min: Math.floor(recentClicks / 12), // Approximate from hourly
+          clicks: [],
+          activeUsers: 0,
+          clicksLast5Min: Math.floor(recentClicks / 12),
           totalClicks: responseData?.totalClicks || 0,
           timeline: responseData?.timeline || [],
         },
       };
     },
-    refetchInterval: 30000, // Refresh every 30 seconds (less aggressive without WebSocket)
+    refetchInterval: 60000, // Refresh every 60 seconds (WebSocket handles real-time)
   });
 
   if (error) {
@@ -128,8 +187,27 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
     );
   }
 
+  // Combine WebSocket clicks with session click count
+  const activeUsers = wsAnalytics.isConnected ? 1 : 0; // At minimum, this user is active
+  const clicksLast5Min = wsAnalytics.clickCount + (data?.data?.clicksLast5Min || 0);
+
   return (
     <div className="space-y-6">
+      {/* Connection Status */}
+      <div className="flex items-center justify-end gap-2">
+        {wsAnalytics.isConnected ? (
+          <Badge variant="outline" className="gap-1 text-green-600 border-green-200">
+            <Wifi className="h-3 w-3" />
+            Connected
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="gap-1 text-yellow-600 border-yellow-200">
+            <WifiOff className="h-3 w-3" />
+            Connecting...
+          </Badge>
+        )}
+      </div>
+
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -142,18 +220,18 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="text-2xl font-bold">
-                {data?.data?.activeUsers || 0}
+                {activeUsers}
               </div>
             )}
             <p className="text-xs text-muted-foreground mt-1">
-              Currently browsing
+              Currently viewing
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clicks (5 min)</CardTitle>
+            <CardTitle className="text-sm font-medium">Session Clicks</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -161,18 +239,18 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="text-2xl font-bold">
-                {data?.data?.clicksLast5Min || 0}
+                {wsAnalytics.clickCount}
               </div>
             )}
             <p className="text-xs text-muted-foreground mt-1">
-              Last 5 minutes
+              Since you connected
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Clicks</CardTitle>
+            <CardTitle className="text-sm font-medium">Live Feed</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -180,11 +258,11 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="text-2xl font-bold">
-                {data?.data?.clicks?.length || 0}
+                {realtimeClicks.length}
               </div>
             )}
             <p className="text-xs text-muted-foreground mt-1">
-              Last 50 clicks
+              Clicks in feed
             </p>
           </CardContent>
         </Card>
@@ -198,38 +276,47 @@ export default function RealtimePanel({ linkId }: RealtimePanelProps) {
               <Activity className="h-5 w-5 text-muted-foreground" />
               <CardTitle>Live Click Feed</CardTitle>
             </div>
-            <Badge variant="outline" className="gap-1">
+            <Badge
+              variant="outline"
+              className={`gap-1 ${wsAnalytics.isConnected ? 'text-green-600 border-green-200' : 'text-yellow-600 border-yellow-200'}`}
+            >
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${wsAnalytics.isConnected ? 'bg-green-400' : 'bg-yellow-400'} opacity-75`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${wsAnalytics.isConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
               </span>
-              Live
+              {wsAnalytics.isConnected ? 'Live' : 'Connecting'}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && realtimeClicks.length === 0 ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
-          ) : data?.data?.clicks && data.data.clicks.length > 0 ? (
+          ) : realtimeClicks.length > 0 ? (
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
-              {data.data.clicks.map((click) => (
-                <ClickItem key={click.id} click={click} />
+              {realtimeClicks.map((click) => (
+                <ClickItem
+                  key={click.id}
+                  click={click}
+                  isNew={newClickIds.has(click.id)}
+                />
               ))}
             </div>
           ) : (
             <div className="py-12 text-center">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-muted-foreground mb-2">
-                Live click feed coming soon
+                {wsAnalytics.isConnected
+                  ? 'Waiting for clicks...'
+                  : 'Connecting to live feed...'}
               </p>
               <p className="text-xs text-muted-foreground">
-                Real-time click tracking requires WebSocket support.
-                <br />
-                Check the timeline and summary analytics for recent activity.
+                {wsAnalytics.isConnected
+                  ? 'New clicks will appear here in real-time as they happen.'
+                  : 'Establishing WebSocket connection for real-time updates.'}
               </p>
             </div>
           )}

@@ -7,6 +7,7 @@ import folderRoutes from './folder.routes';
 import shareRoutes from './share.routes';
 import webhookRoutes from './webhook.routes';
 import predictionRoutes from './prediction.routes';
+import websocketRoutes from './websocket.routes';
 
 const router = Router();
 
@@ -33,6 +34,9 @@ router.use('/webhooks', webhookRoutes);
 
 // Prediction routes
 router.use('/predictions', predictionRoutes);
+
+// WebSocket routes (for monitoring)
+router.use('/websocket', websocketRoutes);
 
 // Future routes will be added here
 // router.use('/users', userRoutes);

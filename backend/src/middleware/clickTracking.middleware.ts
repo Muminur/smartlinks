@@ -11,6 +11,7 @@ import {
   getClientIp,
 } from '../utils/analytics.utils';
 import { CacheService } from '../services/cache.service';
+import { websocketService, ClickEventData } from '../services/websocket.service';
 
 /**
  * Track click event asynchronously
@@ -75,6 +76,45 @@ export const trackClick = async (
     Analytics.create(analyticsData).catch((error) => {
       logger.error('Error saving analytics:', error);
     });
+
+    // Emit WebSocket event for real-time analytics
+    const clickEventData: ClickEventData = {
+      linkId,
+      userId,
+      slug,
+      timestamp: analyticsData.timestamp,
+      location: {
+        country: location.country || null,
+        countryCode: location.countryCode || null,
+        region: location.region || null,
+        city: location.city || null,
+      },
+      device: {
+        type: device.type,
+        brand: device.brand || null,
+        model: device.model || null,
+      },
+      os: {
+        name: os.name || null,
+        version: os.version || null,
+      },
+      browser: {
+        name: browser.name || null,
+        version: browser.version || null,
+      },
+      referrer: {
+        url: referrer.url || null,
+        domain: referrer.domain || null,
+        type: referrer.type,
+      },
+    };
+
+    // Emit to WebSocket clients (non-blocking)
+    try {
+      websocketService.emitClickEvent(clickEventData);
+    } catch (wsError) {
+      logger.debug('WebSocket emit failed (non-critical):', wsError);
+    }
 
     // Increment click count (with optimistic cache update)
     await incrementClickCount(linkId, slug);
@@ -226,21 +266,23 @@ export const getUniqueVisitorCount = async (slug: string): Promise<number> => {
 
 /**
  * Track click with real-time event emitter
- * Useful for WebSocket notifications or real-time dashboards
+ * Uses WebSocket service to broadcast to connected clients
  * @param slug - Link slug
  * @param clickData - Click event data
  */
-export const emitClickEvent = (slug: string, clickData: Record<string, unknown>): void => {
-  // This can be extended to use Socket.io or other event emitters
-  // For now, just log for debugging
-  logger.debug(`Click event emitted for ${slug}:`, {
-    device: clickData.device,
-    location: clickData.location,
-    timestamp: clickData.timestamp,
-  });
+export const emitClickEvent = (slug: string, clickData: ClickEventData): void => {
+  try {
+    // Emit to WebSocket clients via websocketService
+    websocketService.emitClickEvent(clickData);
 
-  // Example: emit to WebSocket clients
-  // io.to(`link:${slug}`).emit('click', clickData);
+    logger.debug(`Click event emitted for ${slug}:`, {
+      device: clickData.device,
+      location: clickData.location,
+      timestamp: clickData.timestamp,
+    });
+  } catch (error) {
+    logger.debug('Error emitting click event:', error);
+  }
 };
 
 /**
