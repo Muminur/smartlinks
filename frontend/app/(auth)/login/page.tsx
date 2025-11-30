@@ -14,6 +14,7 @@ import { Alert } from '@/components/ui/Alert';
 import { loginSchema } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/stores/auth-store';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 function LoginContent() {
   const router = useRouter();
@@ -51,7 +52,7 @@ function LoginContent() {
         setToken(response.data.accessToken);
 
         // Store token in localStorage for axios interceptor
-        localStorage.setItem('token', response.data.accessToken);
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken);
 
         // Redirect to dashboard or original destination
         router.push(redirectTo);

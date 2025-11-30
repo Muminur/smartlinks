@@ -1,7 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
 
-// General API rate limiter
+// General API rate limiter - skips authenticated users
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -14,6 +14,11 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  // Skip rate limiting for authenticated users (they have their own higher limits)
+  skip: (req: Request) => {
+    const authHeader = req.headers.authorization;
+    return !!(authHeader && authHeader.startsWith('Bearer '));
+  },
   handler: (_req: Request, res: Response): void => {
     res.status(429).json({
       success: false,
