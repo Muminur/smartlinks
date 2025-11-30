@@ -30,8 +30,8 @@ export async function getLinks(
  * Get a single link by ID
  */
 export async function getLinkById(id: string): Promise<Link> {
-  const response = await api.get<ApiResponse<Link>>(`/links/${id}`);
-  return response.data.data!;
+  const response = await api.get<ApiResponse<{ link: Link }>>(`/links/${id}`);
+  return response.data.data!.link;
 }
 
 /**
@@ -46,11 +46,11 @@ export async function getLinkBySlug(slug: string): Promise<Link> {
  * Create a new shortened link
  */
 export async function createLink(data: CreateLinkData): Promise<Link> {
-  const response = await api.post<ApiResponse<Link>>(
+  const response = await api.post<ApiResponse<{ link: Link }>>(
     '/links/shorten',
     data
   );
-  return response.data.data!;
+  return response.data.data!.link;
 }
 
 /**
@@ -60,8 +60,8 @@ export async function updateLink(
   id: string,
   data: UpdateLinkData
 ): Promise<Link> {
-  const response = await api.put<ApiResponse<Link>>(`/links/${id}`, data);
-  return response.data.data!;
+  const response = await api.put<ApiResponse<{ link: Link }>>(`/links/${id}`, data);
+  return response.data.data!.link;
 }
 
 /**
@@ -85,11 +85,11 @@ export async function toggleLinkStatus(
   id: string,
   isActive: boolean
 ): Promise<Link> {
-  const response = await api.patch<ApiResponse<Link>>(
+  const response = await api.patch<ApiResponse<{ link: Link }>>(
     `/links/${id}/status`,
     { isActive }
   );
-  return response.data.data!;
+  return response.data.data!.link;
 }
 
 /**
