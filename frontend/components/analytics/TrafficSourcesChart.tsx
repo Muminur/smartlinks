@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Share2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { API_ENDPOINTS, CHART_COLORS_ARRAY } from '@/lib/constants';
+import api from '@/lib/axios';
 import type { DateRange, ReferrerData } from '@/types/analytics';
 
 interface TrafficSourcesChartProps {
@@ -27,25 +28,27 @@ export default function TrafficSourcesChart({ linkId, dateRange }: TrafficSource
 
   const { data, isLoading, error } = useQuery<{
     success: boolean;
-    data: ReferrerData[];
+    data: { topReferrers?: ReferrerData[]; referrerTypeBreakdown?: ReferrerData[] };
   }>({
-    queryKey: ['analytics-referrers', linkId, dateRange],
+    queryKey: ['analytics-traffic-sources', linkId, dateRange],
     queryFn: async () => {
-      const params = new URLSearchParams({
+      const params = {
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
-      });
+      };
 
       const endpoint =
         linkId === 'all'
-          ? `/analytics/referrers?${params}`
-          : API_ENDPOINTS.ANALYTICS.REFERRERS(linkId) + `?${params}`;
+          ? API_ENDPOINTS.ANALYTICS.USER
+          : API_ENDPOINTS.ANALYTICS.REFERRERS(linkId);
 
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch referrer data');
-      return response.json();
+      const response = await api.get(endpoint, { params });
+      return response.data;
     },
   });
+
+  // Get referrer data from response (handle different backend response formats)
+  const referrerList = data?.data?.topReferrers || data?.data?.referrerTypeBreakdown || [];
 
   // Categorize traffic sources
   const categorizeSource = (referrer: string): string => {
@@ -85,13 +88,14 @@ export default function TrafficSourcesChart({ linkId, dateRange }: TrafficSource
 
   const trafficSources: TrafficSource[] = [];
 
-  if (data?.data) {
+  if (referrerList && referrerList.length > 0) {
     const categories = new Map<string, number>();
 
-    data.data.forEach((referrer) => {
-      const category = categorizeSource(referrer.referrer);
+    referrerList.forEach((referrer: ReferrerData) => {
+      const category = categorizeSource(referrer.referrer || referrer._id || 'Direct');
+      const clicks = referrer.clicks || referrer.count || 0;
       const current = categories.get(category) || 0;
-      categories.set(category, current + referrer.clicks);
+      categories.set(category, current + clicks);
     });
 
     const total = Array.from(categories.values()).reduce((sum, val) => sum + val, 0);
