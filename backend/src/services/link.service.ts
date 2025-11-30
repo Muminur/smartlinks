@@ -277,7 +277,12 @@ class LinkService {
 
       const slug = await this.generateSlug(linkData.customSlug, userPlanType);
       const metadata = await this.extractMetadata(linkData.originalUrl);
-      const domain = linkData.domain || process.env.SHORT_DOMAIN || process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'localhost:5000';
+      // Use backend URL for redirects (PORT 5000), not frontend URL (PORT 3000)
+      const backendPort = process.env.PORT || '5000';
+      const defaultDomain = process.env.NODE_ENV === 'production'
+        ? (process.env.SHORT_DOMAIN || process.env.BACKEND_URL?.replace(/^https?:\/\//, '') || 'localhost')
+        : `localhost:${backendPort}`;
+      const domain = linkData.domain || process.env.SHORT_DOMAIN || defaultDomain;
       const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
       const shortUrl = `${protocol}://${domain}/${slug}`;
 
