@@ -3,8 +3,10 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { getUserTimeline } from '@/lib/api/analytics';
 
 interface ChartData {
   date: string;
@@ -17,25 +19,30 @@ interface ClicksChartProps {
   period?: '7d' | '30d' | '90d';
 }
 
-// Mock data for demonstration
-const generateMockData = (days: number): ChartData[] => {
-  const data: ChartData[] = [];
-  const today = new Date();
+export function ClicksChart({ data: propData, loading: propLoading = false, period = '7d' }: ClicksChartProps) {
+  // Determine number of days based on period
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
 
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    data.push({
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      clicks: Math.floor(Math.random() * 1000) + 200,
-    });
-  }
+  // Fetch timeline data from API if no data prop provided
+  const {
+    data: fetchedData,
+    isLoading: isFetching,
+    error,
+  } = useQuery({
+    queryKey: ['user-timeline', days],
+    queryFn: () => getUserTimeline(days),
+    enabled: !propData, // Only fetch if no data prop provided
+    staleTime: 60000, // 1 minute
+    retry: 2,
+  });
 
-  return data;
-};
+  // Use prop data if provided, otherwise use fetched data
+  // Memoize to avoid recreating the array on every render
+  const chartData = useMemo(() => {
+    return propData || fetchedData || [];
+  }, [propData, fetchedData]);
 
-export function ClicksChart({ data, loading = false, period = '7d' }: ClicksChartProps) {
-  const chartData = data || generateMockData(period === '7d' ? 7 : period === '30d' ? 30 : 90);
+  const loading = propLoading || isFetching;
 
   const stats = useMemo(() => {
     if (chartData.length === 0) {
@@ -51,10 +58,14 @@ export function ClicksChart({ data, loading = false, period = '7d' }: ClicksChar
     const firstHalf = chartData.slice(0, midPoint);
     const secondHalf = chartData.slice(midPoint);
 
-    const firstAvg = firstHalf.reduce((sum, item) => sum + item.clicks, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, item) => sum + item.clicks, 0) / secondHalf.length;
+    const firstAvg = firstHalf.length > 0
+      ? firstHalf.reduce((sum, item) => sum + item.clicks, 0) / firstHalf.length
+      : 0;
+    const secondAvg = secondHalf.length > 0
+      ? secondHalf.reduce((sum, item) => sum + item.clicks, 0) / secondHalf.length
+      : 0;
 
-    const trend = ((secondAvg - firstAvg) / firstAvg) * 100;
+    const trend = firstAvg > 0 ? ((secondAvg - firstAvg) / firstAvg) * 100 : 0;
 
     return { total, average, trend, max };
   }, [chartData]);
@@ -69,33 +80,44 @@ export function ClicksChart({ data, loading = false, period = '7d' }: ClicksChar
               {period === '7d' ? 'Last 7 days' : period === '30d' ? 'Last 30 days' : 'Last 90 days'}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            {stats.trend >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            )}
-            <span
-              className={cn(
-                'font-medium',
-                stats.trend >= 0 ? 'text-green-600' : 'text-red-600'
+          {!loading && chartData.length > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              {stats.trend >= 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-600" />
               )}
-            >
-              {stats.trend >= 0 ? '+' : ''}
-              {stats.trend.toFixed(1)}%
-            </span>
-          </div>
+              <span
+                className={cn(
+                  'font-medium',
+                  stats.trend >= 0 ? 'text-green-600' : 'text-red-600'
+                )}
+              >
+                {stats.trend >= 0 ? '+' : ''}
+                {stats.trend.toFixed(1)}%
+              </span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="h-64 animate-pulse rounded bg-muted" />
+        ) : error ? (
+          <div className="flex h-64 items-center justify-center">
+            <p className="text-sm text-muted-foreground">Failed to load chart data</p>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="flex h-64 flex-col items-center justify-center">
+            <p className="text-sm font-medium">No click data available</p>
+            <p className="text-xs text-muted-foreground">Start sharing your links to see analytics</p>
+          </div>
         ) : (
           <div className="space-y-4">
             {/* Simple Bar Chart */}
             <div className="flex h-64 items-end justify-between gap-1">
               {chartData.map((item, index) => {
-                const heightPercentage = (item.clicks / stats.max) * 100;
+                const heightPercentage = stats.max > 0 ? (item.clicks / stats.max) * 100 : 0;
 
                 return (
                   <motion.div

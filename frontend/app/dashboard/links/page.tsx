@@ -24,7 +24,9 @@ import type { Link, LinkFilters } from '@/types';
 import { useLinkStore } from '@/stores/link-store';
 import { toast } from 'sonner';
 
-const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://short.link';
+// Use the backend URL for short links (where redirects are handled)
+// Falls back to environment variable or default backend URL
+const SHORT_URL_BASE = process.env.NEXT_PUBLIC_SHORT_URL_BASE || 'http://localhost:5000';
 
 export default function LinksPage() {
   // State
@@ -288,7 +290,7 @@ export default function LinksPage() {
         onViewAnalytics={handleViewAnalytics}
         onShowQR={handleShowQR}
         onShare={handleShare}
-        baseUrl={BASE_URL}
+        baseUrl={SHORT_URL_BASE}
         sortBy={filters.sortBy}
         sortOrder={filters.sortOrder}
         onSort={handleSort}
@@ -329,14 +331,14 @@ export default function LinksPage() {
           <QRCodeGenerator
             open={qrCodeModalOpen}
             onOpenChange={setQRCodeModalOpen}
-            url={`${BASE_URL}/${selectedLink.slug}`}
+            url={`${SHORT_URL_BASE}/${selectedLink.slug}`}
             title={selectedLink.title || selectedLink.slug}
           />
 
           <ShareLinkDialog
             open={shareModalOpen}
             onOpenChange={setShareModalOpen}
-            url={`${BASE_URL}/${selectedLink.slug}`}
+            url={`${SHORT_URL_BASE}/${selectedLink.slug}`}
             title={selectedLink.title || selectedLink.slug}
             onShowQRCode={() => {
               setShareModalOpen(false);

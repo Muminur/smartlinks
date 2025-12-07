@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   ExternalLink,
   Copy,
@@ -22,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { getLinks } from '@/lib/api/links';
+import type { Link as LinkType } from '@/types';
 
 interface LinkItem {
   id: string;
@@ -37,44 +40,37 @@ interface RecentLinksProps {
   loading?: boolean;
 }
 
-// Mock data for demonstration
-const mockLinks: LinkItem[] = [
-  {
-    id: '1',
-    slug: 'product-launch',
-    originalUrl: 'https://example.com/our-new-product-launch-2024',
-    clicks: 1234,
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    isActive: true,
-  },
-  {
-    id: '2',
-    slug: 'blog-post',
-    originalUrl: 'https://blog.example.com/how-to-improve-marketing',
-    clicks: 856,
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-    isActive: true,
-  },
-  {
-    id: '3',
-    slug: 'promo-code',
-    originalUrl: 'https://store.example.com/promotions/summer-sale',
-    clicks: 2341,
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    isActive: true,
-  },
-  {
-    id: '4',
-    slug: 'newsletter',
-    originalUrl: 'https://example.com/newsletter/subscribe',
-    clicks: 412,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    isActive: false,
-  },
-];
-
-export function RecentLinks({ links = mockLinks, loading = false }: RecentLinksProps) {
+export function RecentLinks({ links: propLinks, loading: propLoading = false }: RecentLinksProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Fetch recent links from API if no links prop provided
+  const {
+    data: fetchedLinksData,
+    isLoading: isFetching,
+    error,
+  } = useQuery({
+    queryKey: ['recent-links', { page: 1, limit: 4, sortBy: 'createdAt', sortOrder: 'desc' }],
+    queryFn: () => getLinks({ page: 1, limit: 4, sortBy: 'createdAt', sortOrder: 'desc' }),
+    enabled: !propLinks, // Only fetch if no links prop provided
+    staleTime: 30000, // 30 seconds
+    retry: 2,
+  });
+
+  // Transform fetched links to LinkItem format
+  const transformedLinks: LinkItem[] = fetchedLinksData?.data
+    ? fetchedLinksData.data.map((link: LinkType) => ({
+        id: link._id,
+        slug: link.slug,
+        originalUrl: link.originalUrl,
+        clicks: link.clicks,
+        createdAt: new Date(link.createdAt),
+        isActive: link.isActive,
+      }))
+    : [];
+
+  // Use prop links if provided, otherwise use transformed fetched links
+  const links = propLinks || transformedLinks;
+  const loading = propLoading || isFetching;
 
   const handleCopy = async (slug: string, id: string) => {
     const shortUrl = `${window.location.origin}/${slug}`;
@@ -105,6 +101,14 @@ export function RecentLinks({ links = mockLinks, loading = false }: RecentLinksP
                 </div>
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <ExternalLink className="mb-2 h-12 w-12 text-muted-foreground/50" />
+            <p className="text-sm font-medium">Failed to load links</p>
+            <p className="text-xs text-muted-foreground">
+              Please try refreshing the page
+            </p>
           </div>
         ) : links.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -160,13 +164,17 @@ export function RecentLinks({ links = mockLinks, loading = false }: RecentLinksP
                           <Copy className="mr-2 h-4 w-4" />
                           {copiedId === link.id ? 'Copied!' : 'Copy Link'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <BarChart className="mr-2 h-4 w-4" />
-                          View Analytics
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/analytics/${link.id}`}>
+                            <BarChart className="mr-2 h-4 w-4" />
+                            View Analytics
+                          </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Link
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/links/${link.id}/edit`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Link
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600 focus:bg-red-100 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950">

@@ -2,9 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { TrendingUp, ExternalLink } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { getTrendingLinks, type TrendingLink } from '@/lib/api/analytics';
 
 interface PerformingLink {
   id: string;
@@ -19,48 +21,37 @@ interface TopPerformingLinksProps {
   loading?: boolean;
 }
 
-// Mock data for demonstration
-const mockLinks: PerformingLink[] = [
-  {
-    id: '1',
-    slug: 'summer-sale',
-    originalUrl: 'https://store.example.com/promotions/summer-sale',
-    clicks: 5234,
-    conversionRate: 12.5,
-  },
-  {
-    id: '2',
-    slug: 'new-product',
-    originalUrl: 'https://example.com/products/new-release-2024',
-    clicks: 4102,
-    conversionRate: 8.3,
-  },
-  {
-    id: '3',
-    slug: 'blog-seo',
-    originalUrl: 'https://blog.example.com/ultimate-guide-to-seo',
-    clicks: 3845,
-    conversionRate: 15.7,
-  },
-  {
-    id: '4',
-    slug: 'webinar',
-    originalUrl: 'https://events.example.com/marketing-webinar',
-    clicks: 2971,
-    conversionRate: 22.1,
-  },
-  {
-    id: '5',
-    slug: 'newsletter',
-    originalUrl: 'https://example.com/newsletter/subscribe',
-    clicks: 2456,
-    conversionRate: 6.4,
-  },
-];
+export function TopPerformingLinks({ links: propLinks, loading: propLoading = false }: TopPerformingLinksProps) {
+  // Fetch trending links from API if no links prop provided
+  const {
+    data: fetchedLinks,
+    isLoading: isFetching,
+    error,
+  } = useQuery({
+    queryKey: ['trending-links'],
+    queryFn: () => getTrendingLinks('week', 5),
+    enabled: !propLinks, // Only fetch if no links prop provided
+    staleTime: 60000, // 1 minute
+    retry: 2,
+  });
 
-export function TopPerformingLinks({ links = mockLinks, loading = false }: TopPerformingLinksProps) {
+  // Transform fetched trending links to PerformingLink format
+  const transformedLinks: PerformingLink[] = fetchedLinks
+    ? fetchedLinks.map((link: TrendingLink) => ({
+        id: link.linkId,
+        slug: link.slug || link.linkId,
+        originalUrl: link.shortUrl || '',
+        clicks: link.currentClicks,
+        conversionRate: link.growthPercentage > 0 ? link.growthPercentage : undefined,
+      }))
+    : [];
+
+  // Use prop links if provided, otherwise use transformed fetched links
+  const links = propLinks || transformedLinks;
+  const loading = propLoading || isFetching;
+
   // Calculate max clicks for progress bar
-  const maxClicks = Math.max(...links.map((link) => link.clicks), 1);
+  const maxClicks = links.length > 0 ? Math.max(...links.map((link) => link.clicks), 1) : 1;
 
   return (
     <Card>
@@ -80,6 +71,14 @@ export function TopPerformingLinks({ links = mockLinks, loading = false }: TopPe
                 <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <TrendingUp className="mb-2 h-12 w-12 text-muted-foreground/50" />
+            <p className="text-sm font-medium">Failed to load data</p>
+            <p className="text-xs text-muted-foreground">
+              Please try refreshing the page
+            </p>
           </div>
         ) : links.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -145,9 +144,9 @@ export function TopPerformingLinks({ links = mockLinks, loading = false }: TopPe
                                 : 'text-muted-foreground'
                           )}
                         >
-                          {link.conversionRate}%
+                          +{link.conversionRate.toFixed(1)}%
                         </span>
-                        conversion
+                        growth
                       </span>
                     )}
                   </div>
